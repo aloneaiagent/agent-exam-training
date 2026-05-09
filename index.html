@@ -202,7 +202,7 @@ a { color:var(--gold); text-decoration:none; }
 .toggle.on::after { background:var(--gold); left:22px; }
 
 /* 快捷键提示 */
-.shortcut-hint { position:fixed; bottom:20px; right:20px; z-index:50; font-size:11px; color:var(--muted); background:var(--bg-card); border:1px solid var(--border); padding:6px 12px; border-radius:6px; opacity:.5; }
+.shortcut-hint { font-size:11px; color:var(--muted); background:var(--bg-card); border:1px solid var(--border); padding:6px 12px; border-radius:6px; opacity:.5; margin-top:12px; text-align:center; }
 .shortcut-hint kbd { display:inline-block; background:var(--bg-panel); padding:1px 6px; border-radius:3px; font-size:10px; margin:0 2px; }
 
 /* 响应式 */
@@ -234,10 +234,6 @@ a { color:var(--gold); text-decoration:none; }
 <div class="answer-sheet" id="answerSheet"></div>
 <div class="settings-overlay" id="settingsOverlay"></div>
 <div class="settings-panel" id="settingsPanel"></div>
-<div class="shortcut-hint" id="shortcutHint" style="display:none">
-  快捷键: <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 选择 · <kbd>Enter</kbd> 提交 · <kbd>←</kbd><kbd>→</kbd> 翻页
-</div>
-
 <script>
 // ══════════════════════════════════════════════════════
 // 经纪人题库 v2 — 完整版
@@ -426,7 +422,6 @@ function navigate(hash) {
   const route=hash.replace('#','')||'home';
   const parts=route.split('/').map(p=>decodeURIComponent(p));
   const page=parts[0];
-  document.getElementById('shortcutHint').style.display = 'none';
   switch(page) {
     case 'home': renderHome(); break;
     case 's1': renderSubject('科目一'); break;
@@ -506,7 +501,6 @@ async function showExamPicker() {
   await loadIndex();
   if(examTimer) { clearInterval(examTimer); examTimer=null; }
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('shortcutHint').style.display = 'none';
   document.getElementById('sheetOverlay').classList.remove('show');
   document.getElementById('answerSheet').classList.remove('show');
   let html = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">📝 选择模拟卷</div></div><div class="set-grid">';
@@ -562,7 +556,6 @@ async function renderQuiz(source, startIdx) {
   idx = Math.max(0, Math.min(idx, qs.length-1));
   
   quizState.questions=qs; quizState.currentIdx=idx; quizState.source=source; quizState.answered=false; quizState.isExam=false; quizState.wrongMode=false;
-  document.getElementById('shortcutHint').style.display = 'block';
   renderCurrentQuestion();
   document.getElementById('view-quiz').classList.add('active');
 }
@@ -624,6 +617,7 @@ function renderCurrentQuestion() {
         ${quizState.isExam && quizState.answered && idx < total-1 ? `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>` : ''}
         ${quizState.isExam && quizState.answered && idx >= total-1 ? `<button class="btn btn-danger" onclick="submitExam()">📊 交卷</button>` : ''}
       </div>
+      <div class="shortcut-hint">快捷键: <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 选择 · <kbd>Enter</kbd> 提交 · <kbd>←</kbd><kbd>→</kbd> 翻页</div>
     </div>
   `;
   renderSheet();
@@ -723,7 +717,6 @@ async function renderExam(source) {
   // Reset exam answers (exam mode must not reuse practice records)
   examState = { records:{}, startedAt:Date.now(), remaining:50*60, submitted:false };
   quizState.questions=qs; quizState.currentIdx=0; quizState.source=source; quizState.answered=false; quizState.isMulti=false; quizState.isExam=true; quizState.wrongMode=false;
-  document.getElementById('shortcutHint').style.display = 'block';
   
   // Start timer
   if(examTimer) clearInterval(examTimer);
@@ -767,7 +760,6 @@ function submitExam(force=false) {
       </div>
     </div>
   `;
-  document.getElementById('shortcutHint').style.display = 'none';
 }
 
 // ── Wrong Quiz Mode ──
@@ -796,7 +788,6 @@ async function renderWrongQuiz(source) {
   if(!wrongQs.length) { renderReview(); return; }
   
   quizState.questions=wrongQs; quizState.currentIdx=0; quizState.source='错题'; quizState.answered=false; quizState.isMulti=false; quizState.isExam=false; quizState.wrongMode=true;
-  document.getElementById('shortcutHint').style.display = 'block';
   renderCurrentQuestion();
   document.getElementById('view-quiz').classList.add('active');
 }
