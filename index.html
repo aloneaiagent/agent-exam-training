@@ -476,7 +476,7 @@ async function renderHome() {
       <div class="dash-card" onclick="navigate('#s1')"><div class="icon">📘</div><div class="label">科目一</div><div class="count">思想政治与法律基础</div><div class="detail">${indexData['科目一']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
       <div class="dash-card" onclick="navigate('#s2')"><div class="icon">📙</div><div class="label">科目二</div><div class="count">演出市场政策与经纪实务</div><div class="detail">${indexData['科目二']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
       <div class="dash-card" onclick="navigate('#review')"><div class="icon">📕</div><div class="label">错题本</div><div class="count">${wc} 题待复习</div><div class="detail" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc>0?'⚠ 需要巩固':'✅ 暂无错题'}</div></div>
-      <div class="dash-card" onclick="showExamPicker()"><div class="icon">📝</div><div class="label">模拟考试</div><div class="count">限时训练</div><div class="detail">${(indexData['综合']?.['模拟卷']?.['_小计']?.['总题数']||0)} 题 · 多套可选</div></div>
+      <div class="dash-card" onclick="showExamPicker()"><div class="icon">📝</div><div class="label">模拟考试</div><div class="count">限时训练</div><div class="detail">${(()=>{let t=0;for(const k of ['科目一','科目二','综合']){const s=indexData[k]?.['模拟卷']?.['_小计'];if(s)t+=s['总题数']}return t})()} 题 · 多套可选</div></div>
     </div>
     <div class="stats-panel">
       <div class="s-title">📊 学习统计</div>
