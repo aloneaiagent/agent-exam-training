@@ -197,7 +197,7 @@ function userSummary(username, progress) {
   const s2 = calcRate(records, q => q.subject === '科目二');
   return {
     username,
-    lastLogin: progress.lastLogin || null,
+    lastLogin: (progress.stats && progress.stats.lastLogin) || null,
     answered,
     singleAccuracy: single.accuracy, singleDone: single.total,
     multiAccuracy: multi.accuracy, multiDone: multi.total,
@@ -219,7 +219,8 @@ async function handleApi(req, res) {
       const db = await readDb();
       const uname = String(username).trim();
       const userProgress = db.users[uname] || defaultProgress();
-      userProgress.lastLogin = Date.now();
+      userProgress.stats = userProgress.stats || { total: 0, correct: 0 };
+      userProgress.stats.lastLogin = Date.now();
       db.users[uname] = userProgress;
       await writeDb(db);
       return sendJson(res, 200, { token, username: uname, role: u.role, progress: userProgress });
