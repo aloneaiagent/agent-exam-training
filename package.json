@@ -1,7 +1,7 @@
 {
   "name": "agent-exam-training",
-  "version": "1.0.0",
-  "description": "Agent Exam Training — 演出经纪人题库系统",
+  "version": "2.0.0",
+  "description": "Agent Exam Training \u2014 \u6f14\u51fa\u7ecf\u7eaa\u4eba\u9898\u5e93\u7cfb\u7edf",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

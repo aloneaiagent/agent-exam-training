@@ -239,6 +239,10 @@ async function handleApi(req, res) {
       return sendJson(res, 200, { ok: true });
     }
 
+    if (req.method === 'GET' && req.url === '/api/version') {
+      return sendJson(res, 200, { version: '2.0.0', totalQuestions: 2139, subjects: { '科目一': 923, '科目二': 791, '综合': 425 } });
+    }
+
     if (req.method === 'GET' && req.url === '/api/admin/stats') {
       const s = auth(req);
       if (!s) return sendJson(res, 401, { error: '未登录' });
