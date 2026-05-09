@@ -1,7 +1,7 @@
 {
-  "name": "broker-quiz",
+  "name": "agent-exam-training",
   "version": "1.0.0",
-  "description": "演出经纪人题库系统",
+  "description": "Agent Exam Training — 演出经纪人题库系统",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
