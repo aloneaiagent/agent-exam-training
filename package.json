@@ -1,0 +1,16 @@
+{
+  "name": "broker-quiz",
+  "version": "1.0.0",
+  "description": "演出经纪人题库系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build needed'"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  }
+}

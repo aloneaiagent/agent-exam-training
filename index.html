@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>演出经纪人 · 题库演练</title>
+<style>
+/* ══════════════════════════════════════════════════════
+   全局 & 游戏风格
+══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-deep:    #070e1a;
+  --bg-panel:   #0d1b2a;
+  --bg-card:    #112236;
+  --bg-hover:   #162d45;
+  --gold:       #e6b84a;
+  --gold-dim:   #9e7b2a;
+  --gold-glow:  rgba(230,184,74,0.25);
+  --gold-glow-s: rgba(230,184,74,0.12);
+  --teal:       #3dd6c8;
+  --teal-dim:   rgba(61,214,200,0.12);
+  --red:        #e85d5d;
+  --green:      #4ec97d;
+  --green-dim:  rgba(78,201,125,0.12);
+  --yellow:     #f0c040;
+  --white:      #e8edf5;
+  --muted:      #6b809a;
+  --border:     rgba(230,184,74,0.14);
+  --border-h:   rgba(230,184,74,0.35);
+  --shadow:     rgba(0,0,0,0.4);
+  --radius:     10px;
+  --radius-sm:  6px;
+  --font:       'PingFang SC','Microsoft YaHei','Noto Sans SC',-apple-system,sans-serif;
+  --font-size:  16px;
+}
+html, body { width:100%; min-height:100vh; background:var(--bg-deep); color:var(--white); font-family:var(--font); font-size:var(--font-size); overflow-x:hidden; }
+body::before { content:''; position:fixed; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); z-index:1000; }
+a { color:var(--gold); text-decoration:none; }
+.view { display:none; min-height:100vh; }
+.view.active { display:flex; flex-direction:column; }
+.page-header { background:linear-gradient(180deg,#0a1828 0%,var(--bg-panel) 100%); border-bottom:1px solid var(--border); padding:16px 24px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; flex-shrink:0; }
+.back-btn { background:none; border:1px solid var(--border); color:var(--muted); padding:6px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; transition:all .2s; white-space:nowrap; }
+.back-btn:hover { border-color:var(--gold); color:var(--gold); }
+.page-title { font-size:18px; font-weight:600; color:var(--gold); }
+.page-sub { font-size:12px; color:var(--muted); margin-left:auto; }
+
+/* 登录/后台 */
+#view-login { align-items:center; justify-content:center; padding:40px 20px; }
+.login-panel { width:100%; max-width:380px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px; box-shadow:0 12px 40px var(--shadow); }
+.login-panel .lp-title { color:var(--gold); font-size:22px; font-weight:700; text-align:center; margin-bottom:6px; }
+.login-panel .lp-sub { color:var(--muted); font-size:12px; text-align:center; margin-bottom:22px; }
+.login-input { width:100%; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; color:var(--white); margin-bottom:12px; font-family:var(--font); }
+.login-input:focus { outline:none; border-color:var(--gold); }
+.login-error { color:var(--red); font-size:13px; min-height:18px; margin-bottom:10px; }
+.admin-table { width:100%; border-collapse:collapse; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.admin-table th,.admin-table td { padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; font-size:12px; white-space:nowrap; }
+.admin-table th { color:var(--gold); background:var(--bg-panel); }
+.admin-table td { color:var(--white); }
+.admin-wrap { padding:14px 16px; flex:1; overflow:auto; }
+
+/* 首页 */
+#view-home { align-items:center; padding:40px 20px 60px; }
+.title-logo { text-align:center; margin-bottom:48px; }
+.title-logo .zh { font-size:36px; font-weight:700; letter-spacing:3px; color:var(--gold); text-shadow:0 0 30px var(--gold-glow); }
+.title-logo .en { font-size:12px; letter-spacing:4px; color:var(--muted); margin-top:6px; text-transform:uppercase; }
+.deco-line { width:200px; height:1px; background:linear-gradient(90deg,transparent,var(--gold-dim),transparent); margin:16px auto; }
+.dashboard-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; width:100%; max-width:960px; margin-bottom:32px; }
+.dash-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px 20px; text-align:center; cursor:pointer; transition:all .3s; position:relative; overflow:hidden; }
+.dash-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); opacity:0; transition:opacity .3s; }
+.dash-card:hover { background:var(--bg-hover); border-color:var(--gold); transform:translateY(-4px); box-shadow:0 8px 30px var(--gold-glow-s); }
+.dash-card:hover::before { opacity:1; }
+.dash-card .icon { font-size:32px; margin-bottom:8px; }
+.dash-card .label { font-size:15px; font-weight:600; color:var(--white); }
+.dash-card .count { font-size:13px; color:var(--muted); margin-top:4px; }
+.dash-card .detail { font-size:13px; color:var(--teal); margin-top:6px; }
+.stats-panel { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px 24px; width:100%; max-width:960px; margin-bottom:24px; }
+.stats-panel .s-title { font-size:14px; color:var(--muted); margin-bottom:12px; }
+.progress-bar { width:100%; height:6px; background:var(--bg-panel); border-radius:3px; overflow:hidden; margin:8px 0; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:3px; transition:width .5s; }
+.stats-row { display:flex; gap:24px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin-top:8px; }
+.stats-row span { white-space:nowrap; }
+.stats-row .num { color:var(--gold); font-weight:700; }
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin-top:14px; }
+.stat-mini { background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; }
+.stat-mini .sm-label { font-size:12px; color:var(--muted); margin-bottom:4px; }
+.stat-mini .sm-value { font-size:17px; color:var(--gold); font-weight:700; }
+.stat-mini .sm-sub { font-size:11px; color:var(--muted); margin-left:4px; font-weight:400; }
+
+/* 科目分类 */
+.set-grid { padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; flex:1; align-content:start; grid-auto-rows:minmax(116px,auto); }
+.set-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; min-height:116px; cursor:pointer; transition:all .25s; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; }
+.set-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); opacity:0; transition:opacity .3s; }
+.set-card:hover { background:var(--bg-hover); border-color:var(--gold-dim); transform:translateY(-3px); box-shadow:0 6px 24px var(--gold-glow-s); }
+.set-card:hover::before { opacity:1; }
+.set-card .s-title { font-size:15px; font-weight:600; }
+.set-card .s-count { font-size:13px; color:var(--muted); margin-top:4px; }
+.set-card .s-progress { font-size:12px; color:var(--teal); margin-top:6px; }
+.set-card .s-bar { margin-top:8px; height:4px; background:var(--bg-panel); border-radius:2px; overflow:hidden; }
+.set-card .s-fill { height:100%; background:var(--gold-dim); border-radius:2px; }
+.set-card.section-header { cursor:default; background:transparent; border:none; padding:8px 20px 4px; min-height:auto; display:block; font-size:14px; color:var(--muted); grid-column:1/-1; }
+.set-card.section-header:hover { transform:none; box-shadow:none; }
+
+/* 刷题页 */
+#view-quiz, #view-exam { padding:0; }
+.quiz-progress-top { padding:8px 24px; background:var(--bg-panel); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; font-size:13px; color:var(--muted); flex-shrink:0; }
+.quiz-progress-top .qpt-bar { flex:1; height:4px; background:rgba(255,255,255,.08); border-radius:2px; overflow:hidden; }
+.quiz-progress-top .qpt-fill { height:100%; background:var(--gold); border-radius:2px; transition:width .4s; }
+.quiz-body { flex:1; display:flex; flex-direction:column; padding:24px; max-width:800px; width:100%; margin:0 auto; }
+.quiz-type-badge { display:inline-block; background:var(--teal-dim); color:var(--teal); font-size:12px; padding:3px 10px; border-radius:4px; margin-bottom:12px; align-self:flex-start; }
+.quiz-question { font-size:17px; line-height:1.7; margin-bottom:24px; color:var(--white); }
+.quiz-options { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+.quiz-option { display:flex; align-items:flex-start; gap:12px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; cursor:pointer; transition:all .2s; }
+.quiz-option:hover { background:var(--bg-hover); border-color:var(--border-h); }
+.quiz-option.selected { border-color:var(--gold); background:rgba(230,184,74,.08); }
+.quiz-option.correct { border-color:var(--green); background:var(--green-dim); }
+.quiz-option.wrong { border-color:var(--red); background:rgba(232,93,93,.10); }
+.quiz-option.show-correct { border-color:var(--green); background:var(--green-dim); }
+.quiz-option .opt-key { width:24px; height:24px; border-radius:50%; background:var(--bg-panel); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--gold); flex-shrink:0; }
+.quiz-option.selected .opt-key { background:var(--gold); color:var(--bg-deep); }
+.quiz-option.correct .opt-key, .quiz-option.show-correct .opt-key { background:var(--green); color:var(--bg-deep); }
+.quiz-option.wrong .opt-key { background:var(--red); color:var(--bg-deep); }
+.quiz-option .opt-text { font-size:14px; line-height:1.5; padding-top:2px; }
+
+/* 反馈 */
+.quiz-feedback { border-radius:var(--radius); padding:16px 20px; margin-bottom:20px; display:none; }
+.quiz-feedback.show { display:block; }
+.quiz-feedback.correct-fb { background:var(--green-dim); border:1px solid rgba(78,201,125,.25); }
+.quiz-feedback.wrong-fb { background:rgba(232,93,93,.10); border:1px solid rgba(232,93,93,.25); }
+.quiz-feedback .fb-correct { color:var(--green); }
+.quiz-feedback .fb-wrong { color:var(--red); }
+
+.quiz-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:auto; }
+.btn { padding:10px 20px; border:1px solid var(--border); border-radius:var(--radius-sm); cursor:pointer; font-size:14px; transition:all .2s; font-family:var(--font); }
+.btn-primary { background:var(--gold); color:var(--bg-deep); border-color:var(--gold); font-weight:600; }
+.btn-primary:hover { background:#d4a83a; }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+.btn-secondary { background:transparent; color:var(--white); border-color:var(--border); }
+.btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
+.btn-danger { background:transparent; color:var(--red); border-color:rgba(232,93,93,.3); }
+.btn-danger:hover { border-color:var(--red); }
+.btn-small { padding:6px 12px; font-size:12px; }
+
+/* 答题卡侧栏 */
+.answer-sheet-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.6); z-index:200; }
+.answer-sheet-overlay.show { display:block; }
+.answer-sheet { position:fixed; top:0; right:-340px; width:320px; height:100%; background:var(--bg-panel); border-left:1px solid var(--border); z-index:201; transition:right .3s; overflow-y:auto; padding:20px; }
+.answer-sheet.show { right:0; }
+.as-title { font-size:15px; font-weight:600; color:var(--gold); margin-bottom:16px; }
+.as-section { margin-bottom:12px; }
+.as-section .as-stitle { font-size:13px; color:var(--muted); margin-bottom:8px; }
+.as-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.as-dot { width:100%; aspect-ratio:1; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; transition:all .2s; background:var(--bg-card); border:1px solid var(--border); color:var(--muted); }
+.as-dot:hover { border-color:var(--gold); }
+.as-dot.done-correct { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+.as-dot.done-wrong { background:rgba(232,93,93,.15); border-color:var(--red); color:var(--red); }
+.as-dot.current { border-color:var(--gold); color:var(--gold); font-weight:700; }
+.as-legend { display:flex; gap:16px; flex-wrap:wrap; margin-top:16px; font-size:12px; color:var(--muted); }
+.as-legend .lg { display:flex; align-items:center; gap:6px; }
+.as-legend .dot { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+.as-close { position:absolute; top:16px; right:16px; background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; }
+.as-close:hover { color:var(--gold); }
+
+/* 错题本 */
+#view-review { padding:0; }
+.review-empty { text-align:center; padding:80px 20px; color:var(--muted); font-size:15px; }
+.review-empty .re-icon { font-size:48px; margin-bottom:16px; }
+.review-list { padding:20px 24px; display:flex; flex-direction:column; gap:10px; flex:1; }
+.review-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; min-height:116px; cursor:pointer; transition:all .25s; display:flex; flex-direction:column; justify-content:center; }
+.review-card:hover { background:var(--bg-hover); border-color:var(--border-h); }
+.rc-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.rc-source { font-size:12px; color:var(--teal); }
+.rc-type { font-size:11px; color:var(--muted); background:var(--bg-panel); padding:2px 8px; border-radius:3px; }
+.rc-question { font-size:14px; margin-top:8px; line-height:1.5; }
+.rc-answers { font-size:13px; margin-top:6px; }
+.rc-answers .ra-yours { color:var(--red); }
+.rc-answers .ra-correct { color:var(--green); }
+.rc-tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:3px; margin-top:6px; background:rgba(232,93,93,.12); color:var(--red); }
+
+/* 模拟考计时 */
+.exam-timer { padding:8px 24px; background:var(--bg-panel); border-bottom:1px solid var(--border); text-align:center; font-size:14px; color:var(--muted); flex-shrink:0; }
+.exam-timer .timer-num { color:var(--gold); font-weight:700; font-size:18px; font-variant-numeric:tabular-nums; }
+.exam-result { text-align:center; padding:40px 20px; }
+.exam-result .er-score { font-size:64px; font-weight:800; color:var(--gold); text-shadow:0 0 30px var(--gold-glow); }
+.exam-result .er-label { font-size:14px; color:var(--muted); margin-top:8px; }
+.exam-result .er-detail { display:flex; gap:24px; justify-content:center; margin-top:20px; flex-wrap:wrap; font-size:14px; }
+.exam-result .er-detail .er-item { color:var(--muted); }
+.exam-result .er-detail .er-num { color:var(--teal); font-weight:700; }
+.exam-result .er-actions { margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+/* 设置面板 */
+.settings-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.6); z-index:300; }
+.settings-overlay.show { display:block; }
+.settings-panel { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:400px; max-width:90vw; background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:28px; z-index:301; }
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+.setting-row:last-child { border-bottom:none; }
+.setting-row .sl-label { font-size:14px; color:var(--white); }
+.setting-row .sl-desc { font-size:12px; color:var(--muted); margin-top:2px; }
+.toggle { width:44px; height:24px; border-radius:12px; background:var(--bg-card); border:1px solid var(--border); cursor:pointer; position:relative; transition:all .2s; flex-shrink:0; }
+.toggle.on { background:var(--gold-dim); border-color:var(--gold); }
+.toggle::after { content:''; width:18px; height:18px; border-radius:50%; background:var(--muted); position:absolute; top:2px; left:2px; transition:all .2s; }
+.toggle.on::after { background:var(--gold); left:22px; }
+
+/* 快捷键提示 */
+.shortcut-hint { position:fixed; bottom:20px; right:20px; z-index:50; font-size:11px; color:var(--muted); background:var(--bg-card); border:1px solid var(--border); padding:6px 12px; border-radius:6px; opacity:.5; }
+.shortcut-hint kbd { display:inline-block; background:var(--bg-panel); padding:1px 6px; border-radius:3px; font-size:10px; margin:0 2px; }
+
+/* 响应式 */
+@media (max-width:900px) { .dashboard-grid { grid-template-columns:1fr 1fr; max-width:680px; } }
+@media (max-width:640px) {
+  .title-logo .zh { font-size:26px; }
+  .dashboard-grid { grid-template-columns:1fr 1fr; }
+  .set-grid { grid-template-columns:1fr; padding:12px 16px; }
+  .quiz-body { padding:16px; }
+  .answer-sheet { width:100%; right:-100%; }
+  .stats-row { gap:12px; font-size:12px; }
+  .page-header { padding:12px 16px; }
+  .page-title { font-size:15px; }
+  .settings-panel { width:100%; max-width:100%; border-radius:0; }
+}
+</style>
+</head>
+<body>
+
+<div id="view-login" class="view"></div>
+<div id="view-home" class="view active"></div>
+<div id="view-subject" class="view"></div>
+<div id="view-quiz" class="view"></div>
+<div id="view-exam" class="view"></div>
+<div id="view-review" class="view"></div>
+<div id="view-admin" class="view"></div>
+
+<div class="answer-sheet-overlay" id="sheetOverlay"></div>
+<div class="answer-sheet" id="answerSheet"></div>
+<div class="settings-overlay" id="settingsOverlay"></div>
+<div class="settings-panel" id="settingsPanel"></div>
+<div class="shortcut-hint" id="shortcutHint" style="display:none">
+  快捷键: <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 选择 · <kbd>Enter</kbd> 提交 · <kbd>←</kbd><kbd>→</kbd> 翻页
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// 经纪人题库 v2 — 完整版
+// ══════════════════════════════════════════════════════
+const DATA_DIR = './data';
+let indexData = null;
+let questionCache = {};
+let allQuestionMeta = null;
+const LS_KEY = 'ycjjr_progress';
+const AUTH_KEY = 'ycjjr_auth';
+const SET_KEY = 'ycjjr_settings';
+let currentUser = null;
+let authToken = null;
+let currentProgress = { records:{}, wrong:[], stats:{total:0,correct:0} };
+let serverMode = location.protocol.startsWith('http');
+
+const DEFAULT_SETTINGS = { autoNext: true, autoDelay: 800, fontSize: 16, multiStrict: true, sound: false };
+
+// ── Storage ──
+function blankProgress() { return { records:{}, wrong:[], stats:{total:0,correct:0} }; }
+function normalizeProgress(p) { p=p&&typeof p==='object'?p:blankProgress(); p.records=p.records||{}; p.wrong=p.wrong||[]; p.stats=p.stats||{total:0,correct:0}; return p; }
+function loadProgress() { return normalizeProgress(currentProgress); }
+function saveProgress(p) {
+  currentProgress = normalizeProgress(p);
+  localStorage.setItem(`${LS_KEY}_${currentUser?.username||'guest'}`, JSON.stringify(currentProgress));
+  if(authToken) fetch('/api/progress', {method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`}, body:JSON.stringify({progress:currentProgress})}).catch(()=>{});
+}
+function getSettings() {
+  try { return {...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SET_KEY))}; }
+  catch { return {...DEFAULT_SETTINGS}; }
+}
+function saveSettings(s) { localStorage.setItem(SET_KEY, JSON.stringify(s)); }
+
+function getRecord(qid) { const p=loadProgress(); return p.records[qid]||null; }
+function setRecord(qid,correct,answer) {
+  const p=loadProgress();
+  p.records[qid]={correct,answer,time:Date.now()};
+  p.stats.total++;
+  if(correct) p.stats.correct++;
+  if(!correct && !p.wrong.includes(qid)) p.wrong.push(qid);
+  if(correct) p.wrong = p.wrong.filter(w=>w!==qid);
+  saveProgress(p);
+}
+function markMastered(qid) { const p=loadProgress(); p.wrong=p.wrong.filter(w=>w!==qid); saveProgress(p); }
+function getStats() { const p=loadProgress(); return {...p.stats, wrong:p.wrong.length}; }
+function clearWrong(qids) { const p=loadProgress(); p.wrong=qids?p.wrong.filter(w=>!qids.includes(w)):[]; saveProgress(p); }
+
+// ── Auth ──
+function isLoggedIn() { return !!(currentUser && authToken); }
+function authHeaders() { return authToken ? {'Authorization':`Bearer ${authToken}`} : {}; }
+function renderLogin(message='') {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById('view-login');
+  v.innerHTML=`<div class="login-panel">
+    <div class="lp-title">🎭 演出经纪人题库</div>
+    <div class="lp-sub">请输入用户名和密码后开始练习</div>
+    <input class="login-input" id="loginUser" placeholder="用户名" autocomplete="username">
+    <input class="login-input" id="loginPass" placeholder="密码" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+    <div class="login-error" id="loginError">${message||''}</div>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">登录</button>
+  </div>`;
+  v.classList.add('active');
+  setTimeout(()=>document.getElementById('loginUser')?.focus(),50);
+}
+async function doLogin() {
+  const username=document.getElementById('loginUser')?.value.trim();
+  const password=document.getElementById('loginPass')?.value || '';
+  const err=document.getElementById('loginError');
+  try {
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+    const data=await r.json();
+    if(!r.ok) throw new Error(data.error||'登录失败');
+    authToken=data.token; currentUser={username:data.username, role:data.role}; currentProgress=normalizeProgress(data.progress);
+    localStorage.setItem(AUTH_KEY, JSON.stringify({token:authToken, user:currentUser}));
+    localStorage.setItem(`${LS_KEY}_${currentUser.username}`, JSON.stringify(currentProgress));
+    navigate('#home');
+  } catch(e) { if(err) err.textContent=e.message || '登录失败'; }
+}
+function logout() { localStorage.removeItem(AUTH_KEY); authToken=null; currentUser=null; currentProgress=blankProgress(); renderLogin('已退出登录'); }
+async function restoreLogin() {
+  try {
+    const raw=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');
+    if(!raw?.token) return false;
+    authToken=raw.token; currentUser=raw.user;
+    const r=await fetch('/api/me',{headers:authHeaders()});
+    if(!r.ok) throw new Error('expired');
+    const data=await r.json(); currentUser={username:data.username, role:data.role}; currentProgress=normalizeProgress(data.progress);
+    return true;
+  } catch { localStorage.removeItem(AUTH_KEY); authToken=null; currentUser=null; currentProgress=blankProgress(); return false; }
+}
+
+// ── Data Loading ──
+async function loadIndex() { if(indexData) return indexData; const r=await fetch(`${DATA_DIR}/index.json`, {cache:'no-store'}); indexData=await r.json(); return indexData; }
+async function loadQuestions(fn) { if(questionCache[fn]) return questionCache[fn]; const r=await fetch(`${DATA_DIR}/${fn}`, {cache:'no-store'}); questionCache[fn]=await r.json(); return questionCache[fn]; }
+async function loadAllQuestionMeta() {
+  if(allQuestionMeta) return allQuestionMeta;
+  const r = await fetch(`${DATA_DIR}/all_questions.json`, {cache:'no-store'});
+  const arr = await r.json();
+  allQuestionMeta = {};
+  for(const q of arr) allQuestionMeta[q.id] = { type:q['题型']||'', subject:q['科目']||'' };
+  return allQuestionMeta;
+}
+function calcRate(records, predicate) {
+  let total=0, correct=0;
+  for(const [qid, rec] of Object.entries(records||{})) {
+    const meta = allQuestionMeta?.[qid] || {};
+    if(!predicate(meta, qid, rec)) continue;
+    total++;
+    if(rec?.correct) correct++;
+  }
+  return { total, correct, accuracy: total ? Math.round(correct/total*100) : 0 };
+}
+function formatRateBox(label, item) {
+  return `<div class="stat-mini"><div class="sm-label">${label}</div><div class="sm-value">${item.total?item.accuracy+'%':'-'}<span class="sm-sub">${item.total?`(${item.total})`:''}</span></div></div>`;
+}
+function getFileFromSrc(subject,src) {
+  const idx=indexData; if(!idx[subject]) return null;
+  for(const qt of ['主题库','模拟卷']) if(idx[subject][qt] && idx[subject][qt][src]) return idx[subject][qt][src]['文件'];
+  return null;
+}
+function getAllSources(subject) {
+  const idx=indexData; const sources=[];
+  for(const qt of ['主题库','模拟卷']) {
+    const g=idx[subject]?.[qt]; if(!g) continue;
+    for(const [name,info] of Object.entries(g)) { if(name.startsWith('_')) continue; sources.push({name,file:info['文件'],total:info['总题数'],type:qt,subject}); }
+  }
+  return sources;
+}
+async function getQuestionsBySource(source) {
+  for(const km of ['科目一','科目二','综合']) { const f=getFileFromSrc(km,source); if(f) return await loadQuestions(f); }
+  return null;
+}
+
+function getSourceSubjectHash(source) {
+  if(!indexData || !source) return '#home';
+  for(const km of ['科目一','科目二','综合']) {
+    for(const qt of ['主题库','模拟卷']) {
+      const group=indexData[km]?.[qt]; if(!group) continue;
+      if(group[source]) {
+        if(km==='科目一') return '#s1';
+        if(km==='科目二') return '#s2';
+        return '#home';
+      }
+    }
+  }
+  return '#home';
+}
+function goBackFromQuestion() {
+  if(quizState.isExam) { showExamPicker(); return; }
+  if(quizState.wrongMode) { navigate('#review'); return; }
+  navigate(getSourceSubjectHash(quizState.source));
+}
+
+function getQuestionUrl(q) {
+  const m = String(q?.id || '').match(/_(\d{6})_/);
+  return m ? `https://www.ycjjr.net/article/${m[1]}.html` : '';
+}
+function getQuestionArticleId(q) {
+  const m = String(q?.id || '').match(/_(\d{6})_/);
+  return m ? m[1] : '';
+}
+
+function formatSourceName(source, subject='') {
+  if(!source) return '';
+  const mockOrder = ['模拟试题（常考点）','模拟试题（常考点2）','模拟题'];
+  const mockIdx = mockOrder.indexOf(source);
+  if(mockIdx >= 0) return `模拟卷 ${String(mockIdx+1).padStart(2,'0')}`;
+  const km = subject || (source.includes('思想政治') ? '科目一' : (source.includes('演出市场') ? '科目二' : ''));
+  if(indexData && (km==='科目一' || km==='科目二')) {
+    const arr = getAllSources(km).filter(s=>s.type==='主题库');
+    const idx = arr.findIndex(s=>s.name===source);
+    if(idx >= 0) return `${km==='科目一'?'基础题库':'实务题库'} ${String(idx+1).padStart(2,'0')}`;
+  }
+  return source.replace(/^思想政治与法律基础_/, '').replace(/^演出市场政策与经纪实务_/, '');
+}
+
+// ── Routing ──
+function navigate(hash) {
+  if(!isLoggedIn()) { renderLogin(); return; }
+  // Clean up transient UI
+  if(examTimer) { clearInterval(examTimer); examTimer=null; }
+  document.getElementById('sheetOverlay')?.classList.remove('show');
+  document.getElementById('answerSheet')?.classList.remove('show');
+  hideSettings?.();
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const route=hash.replace('#','')||'home';
+  const parts=route.split('/').map(p=>decodeURIComponent(p));
+  const page=parts[0];
+  document.getElementById('shortcutHint').style.display = 'none';
+  switch(page) {
+    case 'home': renderHome(); break;
+    case 's1': renderSubject('科目一'); break;
+    case 's2': renderSubject('科目二'); break;
+    case 'quiz': renderQuiz(parts[1], parts.length>2 ? parseInt(parts[2]) : null); break;
+    case 'exam': renderExam(parts[1]); break;
+    case 'review': renderReview(); break;
+    case 'admin': renderAdmin(); break;
+    case 'wrong': renderWrongQuiz(parts[1]||null); break;
+    default: renderHome();
+  }
+}
+window.addEventListener('hashchange',()=>navigate(location.hash));
+window.addEventListener('load',()=>navigate(location.hash));
+document.addEventListener('keydown', handleKeydown);
+
+// ── Keyboard shortcuts ──
+function handleKeydown(e) {
+  const quizActive = document.getElementById('view-quiz').classList.contains('active') ||
+                     document.getElementById('view-exam').classList.contains('active');
+  if (!quizActive) return;
+  const key = e.key.toUpperCase();
+  if (/^[ABCD]$/.test(key) && !quizState.answered) {
+    e.preventDefault();
+    const opts = document.querySelectorAll('.quiz-option');
+    for(const o of opts) { if(o.dataset.key===key) { selectOption(o,quizState.isMulti); break; } }
+    return;
+  }
+  if (key==='ENTER' && !quizState.answered) { e.preventDefault(); submitAnswer(); return; }
+  if (key==='ARROWLEFT') { e.preventDefault(); previousQuestion(); return; }
+  if (key==='ARROWRIGHT') { e.preventDefault(); nextQuestion(); return; }
+}
+
+// ── Home ──
+async function renderHome() {
+  const v=document.getElementById('view-home'); await loadIndex(); await loadAllQuestionMeta();
+  const stats=getStats(); const records=loadProgress().records||{}; let totalAll=0;
+  for(const km of ['科目一','科目二','综合']) for(const qt of ['主题库','模拟卷']) { const sub=indexData[km]?.[qt]?.['_小计']; if(sub) totalAll+=sub['总题数']; }
+  const answeredCount = Object.keys(records).length;
+  const correctCount = Object.values(records).filter(r=>r?.correct).length;
+  const pct=totalAll>0?Math.round(answeredCount/totalAll*100):0;
+  const wc=stats.wrong||0;
+  const singleRate=calcRate(records, m=>m.type==='单选题');
+  const multiRate=calcRate(records, m=>m.type==='多选题');
+  const judgeRate=calcRate(records, m=>m.type==='判断题');
+  const s1Rate=calcRate(records, m=>m.subject==='科目一');
+  const s2Rate=calcRate(records, m=>m.subject==='科目二');
+  
+  v.innerHTML=`
+    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div><div class="en" style="margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:2px;">题库演练系统</div></div>
+    <div class="dashboard-grid">
+      <div class="dash-card" onclick="navigate('#s1')"><div class="icon">📘</div><div class="label">科目一</div><div class="count">思想政治与法律基础</div><div class="detail">${indexData['科目一']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
+      <div class="dash-card" onclick="navigate('#s2')"><div class="icon">📙</div><div class="label">科目二</div><div class="count">演出市场政策与经纪实务</div><div class="detail">${indexData['科目二']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
+      <div class="dash-card" onclick="navigate('#review')"><div class="icon">📕</div><div class="label">错题本</div><div class="count">${wc} 题待复习</div><div class="detail" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc>0?'⚠ 需要巩固':'✅ 暂无错题'}</div></div>
+      <div class="dash-card" onclick="showExamPicker()"><div class="icon">📝</div><div class="label">模拟考试</div><div class="count">限时训练</div><div class="detail">${(indexData['综合']?.['模拟卷']?.['_小计']?.['总题数']||0)} 题 · 多套可选</div></div>
+    </div>
+    <div class="stats-panel">
+      <div class="s-title">📊 学习统计</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="stats-row"><span>当前用户: <span class="num">${currentUser?.username||''}</span></span><span>已做题数: <span class="num">${answeredCount}</span> / ${totalAll}</span><span>总正确率: <span class="num">${answeredCount?Math.round(correctCount/answeredCount*100):0}%</span></span><span>待复习: <span class="num" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc}</span></span><span style="margin-left:auto;cursor:pointer;color:var(--muted)" onclick="showSettings()">⚙️ 设置</span>${currentUser?.role === 'admin' ? `<span style="cursor:pointer;color:var(--gold)" onclick="navigate('#admin')">📊 后台统计</span>` : ''}<span style="cursor:pointer;color:var(--muted)" onclick="logout()">退出</span></div>
+      <div class="stat-grid">
+        <div class="stat-mini"><div class="sm-label">已做题数</div><div class="sm-value">${answeredCount}<span class="sm-sub">/${totalAll}</span></div></div>
+        ${formatRateBox('单选正确率', singleRate)}
+        ${formatRateBox('多选正确率', multiRate)}
+        ${formatRateBox('判断题正确率', judgeRate)}
+        ${formatRateBox('科目一正确率', s1Rate)}
+        ${formatRateBox('科目二正确率', s2Rate)}
+      </div>
+    </div>
+  `;
+  document.title = '演出经纪人 · 题库演练';
+  document.getElementById('view-home').classList.add('active');
+}
+
+// ── Exam Picker ──
+async function showExamPicker() {
+  await loadIndex();
+  if(examTimer) { clearInterval(examTimer); examTimer=null; }
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('shortcutHint').style.display = 'none';
+  document.getElementById('sheetOverlay').classList.remove('show');
+  document.getElementById('answerSheet').classList.remove('show');
+  let html = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">📝 选择模拟卷</div></div><div class="set-grid">';
+  for(const km of ['科目一','科目二','综合']) {
+    const mockGroup = indexData[km]?.['模拟卷'];
+    if(!mockGroup) continue;
+    for(const [name,info] of Object.entries(mockGroup)) {
+      if(name.startsWith('_')) continue;
+      html += `<div class="set-card" onclick="navigate('#exam/${encodeURIComponent(name)}')"><div class="s-title">${formatSourceName(name, km)}</div><div class="s-count">${info['总题数']} 题 · ${info['单选题']}单选${info['多选题']?` · ${info['多选题']}多选`:''}</div><div class="s-progress">限时 50 分钟 · 顺序答题</div></div>`;
+    }
+  }
+  // Also list mock files that are in 综合
+  html += '</div>';
+  const v=document.getElementById('view-exam'); v.innerHTML=html; document.title='选择模拟卷 · 演出经纪人'; v.classList.add('active');
+}
+
+// ── Subject ──
+async function renderSubject(subject) {
+  const v=document.getElementById('view-subject'); await loadIndex();
+  const sources=getAllSources(subject);
+  const subInfo = { '科目一':{name:'思想政治与法律基础',icon:'📘'}, '科目二':{name:'演出市场政策与经纪实务',icon:'📙'}, '综合':{name:'综合',icon:'📚'} }[subject]||{name:subject,icon:'📚'};
+  let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}</div></div><div class="set-grid">`;
+  let lastType='';
+  for(const src of sources) {
+    if(src.type!==lastType) { html+=`<div class="set-card section-header">${src.type==='主题库'?'📚 主题题库':'📝 模拟试卷（独立成套）'}</div>`; lastType=src.type; }
+    const progress=loadProgress();
+    const sq=await loadQuestions(src.file);
+    let doneCount=0; for(const q of sq) if(progress.records[q.id]) doneCount++;
+    const pct=src.total>0?Math.round(doneCount/src.total*100):0;
+    const sn=formatSourceName(src.name, subject);
+    html+=`<div class="set-card" onclick="navigate('#quiz/${encodeURIComponent(src.name)}')"><div class="s-title">${sn}</div><div class="s-count">${src.total} 题 · ${sq.filter(q=>q.题型==='单选题').length}单选 ${sq.filter(q=>q.题型==='多选题').length}多选</div><div class="s-progress">已完成 ${doneCount}/${src.total}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
+  }
+  html+='</div>';
+  v.innerHTML=html; document.title=`${subject} · 演出经纪人`;
+  document.getElementById('view-subject').classList.add('active');
+}
+
+// ── Quiz State ──
+let quizState = { questions:[], currentIdx:0, source:'', answered:false, isMulti:false, isExam:false, wrongMode:false };
+let examState = { records:{}, startedAt:null, remaining:0, submitted:false };
+
+async function renderQuiz(source, startIdx) {
+  const v=document.getElementById('view-quiz'); await loadIndex();
+  const qs=await getQuestionsBySource(source);
+  if(!qs) { v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">题库未找到</div></div>'; v.classList.add('active'); return; }
+  
+  // Resume from first unanswered when no explicit index is provided
+  let idx = Number.isInteger(startIdx) ? startIdx : 0;
+  if (startIdx === null && !quizState.wrongMode) {
+    const progress = loadProgress();
+    for(let i=0; i<qs.length; i++) { if(!progress.records[qs[i].id]) { idx=i; break; } }
+  }
+  idx = Math.max(0, Math.min(idx, qs.length-1));
+  
+  quizState.questions=qs; quizState.currentIdx=idx; quizState.source=source; quizState.answered=false; quizState.isExam=false; quizState.wrongMode=false;
+  document.getElementById('shortcutHint').style.display = 'block';
+  renderCurrentQuestion();
+  document.getElementById('view-quiz').classList.add('active');
+}
+
+function renderCurrentQuestion() {
+  const v = (quizState.isExam ? document.getElementById('view-exam') : document.getElementById('view-quiz'));
+  const qs=quizState.questions;
+  if(!qs.length || quizState.currentIdx>=qs.length) {
+    if(quizState.wrongMode) {
+      v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">🎉 错题全部消灭！</div></div><div style="text-align:center;padding:60px 20px;color:var(--muted);"><div style="font-size:48px;margin-bottom:16px;">🏆</div><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">太棒了！</div><div>所有错题已掌握</div><br><button class="btn btn-primary" onclick="navigate('#home')">返回首页</button></div>`;
+      return;
+    }
+    v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="goBackFromQuestion()">← 返回</button><div class="page-title">🎉 全部完成！</div></div><div style="text-align:center;padding:60px 20px;color:var(--muted);"><div style="font-size:48px;margin-bottom:16px;">🏆</div><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">太棒了！</div><div>${formatSourceName(quizState.source)} 所有题目已完成</div><br><button class="btn btn-primary" onclick="navigate('#home')">返回首页</button></div>`;
+    return;
+  }
+  const q=qs[quizState.currentIdx]; const idx=quizState.currentIdx; const total=qs.length;
+  const pct=Math.round((idx+1)/total*100); const isMulti=q.题型==='多选题';
+  quizState.isMulti=isMulti;
+  const records = quizState.isExam ? examState.records : loadProgress().records;
+  const record=records[q.id]||null; const options=q.选项||{}; const optKeys=Object.keys(options);
+  
+  let oh='';
+  for(const k of optKeys) {
+    const val=options[k]; const hasPrev=record&&record.answer;
+    let cls='';
+    if(record) { if(record.correct) { cls=record.answer.includes(k)?'correct':''; } else { cls=q.答案.includes(k)?'show-correct':(record.answer.includes(k)?'wrong':''); } }
+    else if(hasPrev && !record.correct) { cls=q.答案.includes(k)?'show-correct':''; }
+    const selected=record&&record.answer&&record.answer.includes(k)?'selected':'';
+    oh+=`<div class="quiz-option ${selected} ${cls}" data-key="${k}" onclick="selectOption(this,${isMulti})"><span class="opt-key">${k}</span><span class="opt-text">${val}</span></div>`;
+  }
+  
+  let fb='';
+  if(record!==null) { quizState.answered=true;
+    fb=record.correct?`<div class="quiz-feedback correct-fb show"><span class="fb-correct">✅ 回答正确！</span></div>`
+      :`<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${q.答案}</span></div>`;
+  }
+  
+  const examClass = '';
+  v.innerHTML=`
+    <div class="page-header">
+      <button class="back-btn" onclick="goBackFromQuestion()">← 返回</button>
+      <div class="page-title">${quizState.isExam?`📝 ${formatSourceName(quizState.source)}`:quizState.wrongMode?'🔄 错题循环':formatSourceName(quizState.source)}</div>
+      <div class="page-sub" style="cursor:pointer" onclick="toggleSheet()">${idx+1}/${total} 📋</div>
+    </div>
+    ${quizState.isExam?`<div class="exam-timer" id="examTimer">⏱ 剩余时间：<span class="timer-num" id="timerDisplay">${formatTime(examState.remaining)}</span></div>`:''}
+    <div class="quiz-progress-top${examClass}"><span>第 ${idx+1} 题</span><div class="qpt-bar"><div class="qpt-fill" style="width:${pct}%"></div></div><span>${pct}%</span></div>
+    <div class="quiz-body">
+      <div class="quiz-type-badge">${isMulti?'📌 多选题':'🔵 单选题'}${quizState.wrongMode?' · 错题复习':''}</div>
+      <div style="font-size:12px;color:var(--muted);margin:-4px 0 12px;">来源：${formatSourceName(q.来源 || quizState.source, q.科目)}${getQuestionUrl(q)?` · <a href="${getQuestionUrl(q)}" target="_blank" rel="noopener noreferrer">原网页 ${getQuestionArticleId(q)}</a>`:''}</div>
+      <div class="quiz-question">${q.题干}${q.解析?`<br><span style="font-size:13px;color:var(--muted);margin-top:8px;display:block;">💡 ${q.解析}</span>`:''}</div>
+      <div class="quiz-options" id="optionsContainer">${oh}</div>
+      ${fb}
+      <div class="quiz-actions">
+        ${!quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>${isMulti?'提交答案':'提交答案'}</button>`:''}
+        ${quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>${isMulti?'提交':'提交'}</button>`:''}
+        ${quizState.isExam&&!quizState.answered?'':`<button class="btn btn-secondary" id="btnNext" onclick="nextQuestion()" style="display:${quizState.answered&&!quizState.isExam?'inline-block':'none'}">下一题 →</button>`}
+        ${!quizState.isExam?`<button class="btn btn-secondary" onclick="previousQuestion()" ${idx===0?'disabled':''}>← 上一题</button>`:''}
+        ${!quizState.isExam?`<button class="btn btn-secondary" onclick="toggleSheet()">📋 答题卡</button>`:''}
+        ${quizState.isExam && quizState.answered && idx < total-1 ? `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>` : ''}
+        ${quizState.isExam && quizState.answered && idx >= total-1 ? `<button class="btn btn-danger" onclick="submitExam()">📊 交卷</button>` : ''}
+      </div>
+    </div>
+  `;
+  renderSheet();
+}
+
+function selectOption(el,isMulti) {
+  if(quizState.answered) return;
+  const c=document.getElementById('optionsContainer');
+  if(!isMulti) { c.querySelectorAll('.quiz-option').forEach(o=>o.classList.remove('selected')); el.classList.add('selected'); }
+  else { el.classList.toggle('selected'); }
+}
+
+function submitAnswer() {
+  const selected = document.querySelectorAll('.quiz-option.selected');
+  if(!selected.length) return;
+  const q=quizState.questions[quizState.currentIdx];
+  const userAns = Array.from(selected).map(el=>el.dataset.key).sort().join('');
+  const correctAns = q.答案;
+  const settings = getSettings();
+  const isCorrect = userAns === correctAns;
+  
+  selected.forEach(el=>{ el.classList.remove('selected'); el.classList.add(isCorrect?'correct':'wrong'); });
+  if(!isCorrect) { document.querySelectorAll('.quiz-option').forEach(el=>{ if(correctAns.includes(el.dataset.key)) el.classList.add('show-correct'); }); }
+  
+  if(quizState.isExam) {
+    examState.records[q.id] = {correct:isCorrect, answer:userAns, time:Date.now()};
+  } else {
+    setRecord(q.id, isCorrect, userAns);
+  }
+  quizState.answered = true;
+  // In wrong mode, check if all wrong questions are cleared
+  if(quizState.wrongMode && isCorrect) {
+    const remaining = loadProgress().wrong.length;
+    if(remaining === 0) {
+      quizState.currentIdx = quizState.questions.length;
+      setTimeout(()=>{ renderCurrentQuestion(); }, settings.autoDelay);
+    }
+  }
+  const sb=document.getElementById('btnSubmit'); if(sb) sb.disabled=true;
+  const nx=document.getElementById('btnNext'); if(nx) nx.style.display='inline-block';
+  
+  const fbHtml=isCorrect
+    ? `<div class="quiz-feedback correct-fb show"><span class="fb-correct">✅ 回答正确！</span></div>`
+    : `<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${correctAns}</span></div>`;
+  const existing=document.querySelector('.quiz-feedback'); if(existing) existing.remove();
+  document.querySelector('.quiz-actions').insertAdjacentHTML('beforebegin', fbHtml);
+  renderSheet();
+  
+  // Auto next (correct only)
+  if(isCorrect && settings.autoNext && !quizState.isExam) {
+    setTimeout(()=>{ nextQuestion(); }, settings.autoDelay);
+  }
+}
+
+function nextQuestion() {
+  if(quizState.currentIdx < quizState.questions.length-1) { quizState.currentIdx++; quizState.answered=false; renderCurrentQuestion(); }
+  else if(quizState.wrongMode && quizState.currentIdx >= quizState.questions.length-1) {
+    // All wrong questions done - redirect to completion
+    const remaining = loadProgress().wrong.length;
+    if(remaining === 0) { quizState.currentIdx = quizState.questions.length; renderCurrentQuestion(); } // will show "all cleared"
+    else { navigate('#review'); }
+  }
+}
+function previousQuestion() {
+  if(quizState.currentIdx > 0) { quizState.currentIdx--; quizState.answered=false; renderCurrentQuestion(); }
+}
+function goToQuestion(idx) { quizState.currentIdx=idx; quizState.answered=false; renderCurrentQuestion(); toggleSheet(); }
+
+function toggleSheet() {
+  document.getElementById('sheetOverlay').classList.toggle('show');
+  document.getElementById('answerSheet').classList.toggle('show');
+}
+function renderSheet() {
+  const sheet=document.getElementById('answerSheet'), overlay=document.getElementById('sheetOverlay');
+  const qs=quizState.questions; if(!qs.length) return;
+  const records = quizState.isExam ? examState.records : loadProgress().records;
+  let singleHtml='', multiHtml='';
+  qs.forEach((q,i)=>{
+    const rec=records[q.id]; let cls='';
+    if(rec) cls=rec.correct?'done-correct':'done-wrong';
+    if(i===quizState.currentIdx) cls+=' current';
+    const dot=`<div class="as-dot ${cls}" onclick="goToQuestion(${i})">${i+1}</div>`;
+    if(q.题型==='多选题') multiHtml+=dot; else singleHtml+=dot;
+  });
+  sheet.innerHTML=`<button class="as-close" onclick="toggleSheet()">✕</button><div class="as-title">📋 答题卡</div><div class="as-section"><div class="as-stitle">单选题 ${qs.filter(q=>q.题型==='单选题').length} 题</div><div class="as-grid">${singleHtml}</div></div>${multiHtml?`<div class="as-section"><div class="as-stitle">多选题 ${qs.filter(q=>q.题型==='多选题').length} 题</div><div class="as-grid">${multiHtml}</div></div>`:''}<div class="as-legend"><span class="lg"><span class="dot" style="background:var(--green-dim);border:1px solid var(--green)"></span> 正确</span><span class="lg"><span class="dot" style="background:rgba(232,93,93,.15);border:1px solid var(--red)"></span> 错误</span><span class="lg"><span class="dot" style="background:var(--bg-card);border:1px solid var(--border)"></span> 未答</span></div>`;
+  overlay.onclick=toggleSheet;
+}
+
+// ── Exam Mode ──
+let examTimer = null;
+function formatTime(seconds) { const m=Math.max(0,Math.floor(seconds/60)); const s=Math.max(0,seconds%60); return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
+async function renderExam(source) {
+  const v=document.getElementById('view-exam'); await loadIndex();
+  const qs=await getQuestionsBySource(source);
+  if(!qs||!qs.length) { v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">模拟卷未找到</div></div>'; v.classList.add('active'); return; }
+  
+  // Reset exam answers (exam mode must not reuse practice records)
+  examState = { records:{}, startedAt:Date.now(), remaining:50*60, submitted:false };
+  quizState.questions=qs; quizState.currentIdx=0; quizState.source=source; quizState.answered=false; quizState.isMulti=false; quizState.isExam=true; quizState.wrongMode=false;
+  document.getElementById('shortcutHint').style.display = 'block';
+  
+  // Start timer
+  if(examTimer) clearInterval(examTimer);
+  examTimer = setInterval(()=>{
+    examState.remaining--;
+    const td=document.getElementById('timerDisplay');
+    if(td) td.textContent=formatTime(examState.remaining);
+    if(examState.remaining<=0 && quizState.isExam) { clearInterval(examTimer); examTimer=null; submitExam(true); }
+  },1000);
+  
+  renderCurrentQuestion();
+  document.getElementById('view-exam').classList.add('active');
+}
+
+function submitExam(force=false) {
+  if(examState.submitted) return;
+  if(!force && !confirm('确定要交卷吗？已答题目将被记录，未答题目计为错误。')) return;
+  if(examTimer) { clearInterval(examTimer); examTimer=null; }
+  examState.submitted = true;
+  const qs=quizState.questions; const records=examState.records;
+  let correct=0, wrong=0, unanswered=0;
+  for(const q of qs) {
+    const rec=records[q.id];
+    if(!rec) unanswered++;
+    else if(rec.correct) correct++;
+    else wrong++;
+  }
+  for(const q of qs) { const rec=records[q.id]; if(rec) setRecord(q.id, rec.correct, rec.answer); }
+  const total=qs.length; const score=Math.round(correct/total*100);
+  const v=document.getElementById('view-exam');
+  v.innerHTML=`
+    <div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📊 模拟考成绩</div></div>
+    <div class="exam-result">
+      <div class="er-score">${score}<span style="font-size:24px;color:var(--muted)">%</span></div>
+      <div class="er-label">${score>=60?'✅ 合格':'❌ 未通过'}</div>
+      <div class="er-detail"><span class="er-item">正确: <span class="er-num">${correct}</span></span><span class="er-item">错误: <span class="er-num">${wrong}</span></span><span class="er-item">未答: <span class="er-num">${unanswered}</span></span><span class="er-item">共: <span class="er-num">${total}</span> 题</span></div>
+      <div class="er-actions">
+        <button class="btn btn-primary" onclick="navigate('#home')">返回首页</button>
+        <button class="btn btn-secondary" onclick="navigate('#review')">查看错题</button>
+        <button class="btn btn-secondary" onclick="navigate('#exam/${encodeURIComponent(quizState.source)}')">再做一次</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('shortcutHint').style.display = 'none';
+}
+
+// ── Wrong Quiz Mode ──
+async function renderWrongQuiz(source) {
+  const v=document.getElementById('view-quiz'); await loadIndex();
+  const progress=loadProgress(); const wrongIds=progress.wrong;
+  if(!wrongIds.length) {
+    v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">🎉 暂无错题</div></div>';
+    v.classList.add('active'); return;
+  }
+  
+  let wrongQs=[];
+  if(source) {
+    const qs=await getQuestionsBySource(source);
+    if(qs) wrongQs=qs.filter(q=>wrongIds.includes(q.id));
+  } else {
+    for(const km of ['科目一','科目二','综合']) for(const qt of ['主题库','模拟卷']) {
+      const g=indexData[km]?.[qt]; if(!g) continue;
+      for(const [name,info] of Object.entries(g)) {
+        if(name.startsWith('_')) continue;
+        const qs=await loadQuestions(info['文件']);
+        for(const q of qs) if(wrongIds.includes(q.id)) wrongQs.push(q);
+      }
+    }
+  }
+  if(!wrongQs.length) { renderReview(); return; }
+  
+  quizState.questions=wrongQs; quizState.currentIdx=0; quizState.source='错题'; quizState.answered=false; quizState.isMulti=false; quizState.isExam=false; quizState.wrongMode=true;
+  document.getElementById('shortcutHint').style.display = 'block';
+  renderCurrentQuestion();
+  document.getElementById('view-quiz').classList.add('active');
+}
+
+// ── Review ──
+async function renderReview() {
+  const v=document.getElementById('view-review'); const progress=loadProgress(); const wrongIds=progress.wrong||[];
+  if(!wrongIds.length) {
+    v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📕 错题本</div></div><div class="review-empty"><div class="re-icon">🎉</div><div>暂无错题，继续保持！</div></div>`;
+    v.classList.add('active'); return;
+  }
+  await loadIndex();
+  
+  // Collect wrong questions with their source info
+  let wrongQs=[];
+  for(const km of ['科目一','科目二','综合']) for(const qt of ['主题库','模拟卷']) {
+    const g=indexData[km]?.[qt]; if(!g) continue;
+    for(const [name,info] of Object.entries(g)) {
+      if(name.startsWith('_')) continue;
+      const qs=await loadQuestions(info['文件']);
+      for(let i=0; i<qs.length; i++) { const q=qs[i]; if(wrongIds.includes(q.id)) wrongQs.push({...q, srcFile:info['文件'], srcName:name, srcSubject:km, srcIndex:i}); }
+    }
+  }
+  
+  let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📕 错题本</div><div class="page-sub">${wrongQs.length} 题待复习 <span style="cursor:pointer;color:var(--gold);margin-left:8px;" onclick="navigate('#wrong')">🔄 错题循环</span></div></div><div class="review-list">`;
+  for(const q of wrongQs) {
+    const rec=progress.records[q.id];
+    const ss=formatSourceName(q.srcName, q.srcSubject)||q.来源;
+    html+=`<div class="review-card" onclick="navigate('#quiz/${encodeURIComponent(q.srcName)}/${q.srcIndex}')"><div class="rc-header"><span class="rc-source">${q.srcSubject} · ${ss}${getQuestionUrl(q)?` · <a href="${getQuestionUrl(q)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">原网页 ${getQuestionArticleId(q)}</a>`:''}</span><span class="rc-type">${q.题型==='多选题'?'多选':'单选'}</span></div><div class="rc-question">${q.题干.length>60?q.题干.slice(0,60)+'...':q.题干}</div><div class="rc-answers"><span class="ra-yours">你的答案：${rec?rec.answer:'未答'}</span> &nbsp;|&nbsp; <span class="ra-correct">正确答案：${q.答案}</span></div><span class="rc-tag" onclick="event.stopPropagation();markMastered(q.id);renderReview()">✅ 标记掌握</span></div>`;
+  }
+  html+=`</div><div style="padding:12px 24px 24px;"><button class="btn btn-danger" onclick="clearWrong();navigate('#review')" style="width:100%">🗑 清空错题本</button></div>`;
+  v.innerHTML=html; document.title='错题本 · 演出经纪人';
+  v.classList.add('active');
+}
+
+
+// ── Admin ──
+async function renderAdmin() {
+  if(currentUser?.role !== 'admin') { navigate('#home'); return; }
+  const v=document.getElementById('view-admin');
+  v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📊 后台统计</div><div class="page-sub">用户做题数据</div></div><div class="admin-wrap"><div style="color:var(--muted);padding:20px;">加载中...</div></div>`;
+  v.classList.add('active');
+  try {
+    const r=await fetch('/api/admin/stats',{headers:authHeaders()});
+    const data=await r.json();
+    if(!r.ok) throw new Error(data.error||'读取失败');
+    const fmt=(acc,total)=> total ? `${acc}% <span style="color:var(--muted)">(${total})</span>` : '-';
+    const metricRows = [
+      ['已做题数', u => u.answered],
+      ['单选正确率', u => fmt(u.singleAccuracy,u.singleDone)],
+      ['多选正确率', u => fmt(u.multiAccuracy,u.multiDone)],
+      ['判断题正确率', u => fmt(u.judgeAccuracy,u.judgeDone)],
+      ['科目一正确率', u => fmt(u.subject1Accuracy,u.subject1Done)],
+      ['科目二正确率', u => fmt(u.subject2Accuracy,u.subject2Done)],
+    ];
+    const head = `<tr><th>指标</th>${data.users.map(u=>`<th>${u.username}</th>`).join('')}</tr>`;
+    const rows = metricRows.map(([label,getter])=>`<tr><th>${label}</th>${data.users.map(u=>`<td>${getter(u)}</td>`).join('')}</tr>`).join('');
+    v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📊 后台统计</div><div class="page-sub">括号内为该分类已做题数</div></div><div class="admin-wrap"><table class="admin-table"><thead>${head}</thead><tbody>${rows}</tbody></table></div>`;
+  } catch(e) {
+    v.querySelector('.admin-wrap').innerHTML=`<div style="color:var(--red);padding:20px;">${e.message}</div>`;
+  }
+}
+
+// ── Settings ──
+function showSettings() {
+  const settings=getSettings();
+  const p=document.getElementById('settingsPanel');
+  p.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;"><span class="page-title">⚙️ 设置</span><button style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;" onclick="hideSettings()">✕</button></div>
+    <div class="setting-row"><div><div class="sl-label">自动下一题</div><div class="sl-desc">答对后自动跳转</div></div><div class="toggle ${settings.autoNext?'on':''}" onclick="toggleSetting('autoNext')"></div></div>
+    <div class="setting-row"><div><div class="sl-label">多选严格判分</div><div class="sl-desc">全选对才算正确</div></div><div class="toggle ${settings.multiStrict?'on':''}" onclick="toggleSetting('multiStrict')"></div></div>
+    <div class="setting-row"><div><div class="sl-label">答题音效</div><div class="sl-desc">正确/错误提示音</div></div><div class="toggle ${settings.sound?'on':''}" onclick="toggleSetting('sound')"></div></div>
+    <div class="setting-row"><div><div class="sl-label">字体大小</div><div class="sl-desc">当前 ${settings.fontSize}px</div></div><div><input type="range" min="14" max="24" value="${settings.fontSize}" oninput="setFont(this.value)" style="width:100px;"></div></div>
+    <div style="margin-top:20px;display:flex;gap:10px;">
+      <button class="btn btn-danger btn-small" onclick="localStorage.removeItem('${LS_KEY}');localStorage.removeItem('${SET_KEY}');navigate('#home');hideSettings()">重置所有数据</button>
+    </div>
+  `;
+  document.getElementById('settingsOverlay').classList.add('show');
+  p.style.display='block';
+}
+function hideSettings() { document.getElementById('settingsOverlay').classList.remove('show'); document.getElementById('settingsPanel').style.display='none'; }
+function toggleSetting(key) {
+  const s=getSettings(); s[key]=!s[key]; saveSettings(s);
+  // Update toggle visual without rebuilding the whole panel
+  const toggles = document.querySelectorAll('.toggle');
+  const idx = ['autoNext','multiStrict','sound'].indexOf(key);
+  if(idx >= 0 && toggles[idx]) toggles[idx].classList.toggle('on');
+}
+function setFont(size) {
+  const s=getSettings(); s.fontSize=parseInt(size); saveSettings(s);
+  document.documentElement.style.setProperty('--font-size', size+'px');
+}
+
+// ── Overlay click to close ──
+document.getElementById('settingsOverlay').addEventListener('click', hideSettings);
+
+// ── Startup ──
+document.addEventListener('DOMContentLoaded', async ()=>{
+  const s=getSettings();
+  document.documentElement.style.setProperty('--font-size', s.fontSize+'px');
+  await loadIndex();
+  const ok = await restoreLogin();
+  if(ok) navigate(location.hash || '#home');
+  else renderLogin();
+});
+</script>
+</body>
+</html>
