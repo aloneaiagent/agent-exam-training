@@ -835,7 +835,9 @@ async function renderAdmin() {
     const data=await r.json();
     if(!r.ok) throw new Error(data.error||'读取失败');
     const fmt=(acc,total)=> total ? `${acc}% <span style="color:var(--muted)">(${total})</span>` : '-';
+    const fmtTime=(ts)=> ts ? new Date(ts).toLocaleString('zh-CN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
     const metricRows = [
+      ['最新登录', u => `<span style="color:var(--gold)">${fmtTime(u.lastLogin)}</span>`],
       ['已做题数', u => u.answered],
       ['单选正确率', u => fmt(u.singleAccuracy,u.singleDone)],
       ['多选正确率', u => fmt(u.multiAccuracy,u.multiDone)],

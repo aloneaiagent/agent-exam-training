@@ -196,7 +196,9 @@ function userSummary(username, progress) {
   const s1 = calcRate(records, q => q.subject === '科目一');
   const s2 = calcRate(records, q => q.subject === '科目二');
   return {
-    username, answered,
+    username,
+    lastLogin: progress.lastLogin || null,
+    answered,
     singleAccuracy: single.accuracy, singleDone: single.total,
     multiAccuracy: multi.accuracy, multiDone: multi.total,
     judgeAccuracy: judge.accuracy, judgeDone: judge.total,
@@ -215,7 +217,12 @@ async function handleApi(req, res) {
       const token = crypto.randomBytes(24).toString('hex');
       sessions.set(token, { username: String(username).trim(), role: u.role, createdAt: Date.now() });
       const db = await readDb();
-      return sendJson(res, 200, { token, username: String(username).trim(), role: u.role, progress: db.users[String(username).trim()] || defaultProgress() });
+      const uname = String(username).trim();
+      const userProgress = db.users[uname] || defaultProgress();
+      userProgress.lastLogin = Date.now();
+      db.users[uname] = userProgress;
+      await writeDb(db);
+      return sendJson(res, 200, { token, username: uname, role: u.role, progress: userProgress });
     }
 
     if (req.method === 'GET' && req.url === '/api/me') {
