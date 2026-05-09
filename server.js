@@ -94,7 +94,7 @@ async function writeDb(db) {
   for (const [username, progress] of Object.entries(db.users || {})) {
     await pgPool.query(
       `UPDATE progress SET records = $1, wrong = $2, stats = $3, generated_at = NOW() WHERE username = $4`,
-      [progress.records || {}, JSON.stringify(progress.wrong || []), progress.stats || { total: 0, correct: 0 }, username]
+      [progress.records || {}, progress.wrong || [], progress.stats || { total: 0, correct: 0 }, username]
     );
   }
 }
