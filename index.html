@@ -1017,67 +1017,59 @@ function renderNote(source) {
     fetch('./data/' + info['文件'], {cache:'no-store'}).then(r=>r.json()).then(data => {
       if (!data.text) { v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">内容为空</div></div>'; v.classList.add('active'); return; }
       
-      const lines = data.text.split('\n');
-      const sectionRegex = /^(第[一二三四五六七八九十]+[部分章节篇])/;
-      let sections = [];
-      let cur = { title: '总览', lines: [] };
+      const lines = data.text.split('\n').filter(l => l.trim());
       
-      for (const l of lines) {
-        const t = l.trim();
-        if (!t) { cur.lines.push(''); continue; }
-        if (sectionRegex.test(t)) {
-          if (cur.lines.length > 0) sections.push(cur);
-          cur = { title: t.replace(/\([^)]*\)/g,'').slice(0,16), lines: [] };
-        } else {
-          cur.lines.push(t);
-        }
-      }
-      if (cur.lines.length > 0) sections.push(cur);
-      
-      // If just 1 section, split by Chinese-numbered headers
-      if (sections.length <= 1 && lines.length > 20) {
-        sections = [];
-        cur = { title: '总览', lines: [] };
-        for (const l of lines) {
-          const t = l.trim();
-          if (!t) { cur.lines.push(''); continue; }
-          if (/^[一二三四五六七八九十]+[、.．]/.test(t) && t.length < 20) {
-            if (cur.lines.length > 0) sections.push(cur);
-            cur = { title: t.slice(0,12), lines: [] };
-          } else {
-            cur.lines.push(t);
-          }
-        }
-        if (cur.lines.length > 0) sections.push(cur);
+      // Split into pages: ~40 lines per page
+      const PER_PAGE = 40;
+      const totalPages = Math.max(1, Math.ceil(lines.length / PER_PAGE));
+      let pages = [];
+      for (let i = 0; i < lines.length; i += PER_PAGE) {
+        pages.push(lines.slice(i, i + PER_PAGE));
       }
       
       const hl = (text) => text.replace(/(必考|超级[^。]*重点|常考|重点|题库|重要|全部记住|必须记住|只能做成小卡片)/g, '<span style="color:var(--red);font-weight:600">$1</span>');
       
-      const renderSec = (idx) => {
-        const sec = sections[idx] || sections[0];
-        if (!sec) return;
+      let currentPage = 0;
+      
+      function renderPage(pageIdx) {
+        currentPage = Math.max(0, Math.min(pageIdx, pages.length - 1));
+        const pageLines = pages[currentPage];
+        if (!pageLines) return;
+        
         let c = '';
-        for (const line of sec.lines) {
-          if (!line) { c += '<div style="height:6px"></div>'; continue; }
-          const isH = /^[一二三四五六七八九十]+[、.．]/.test(line) && line.length < 25;
-          const isS = /^\d+[.、．]/.test(line) || /^[\d]+）/.test(line) || /^[a-zA-Z]+\./.test(line);
-          c += isH ? '<div style="color:var(--teal);font-weight:600;margin-top:14px;margin-bottom:2px;">' + hl(line) + '</div>'
-             : isS ? '<div style="padding-left:12px;margin:1px 0;">' + hl(line) + '</div>'
-             : '<div style="margin:1px 0;">' + hl(line) + '</div>';
+        for (const line of pageLines) {
+          const t = line.trim();
+          if (!t) { c += '<div style="height:6px"></div>'; continue; }
+          const isSection = /^第[一二三四五六七八九十]+[部分章节篇]/.test(t);
+          const isHeader = /^[一二三四五六七八九十]+[、.．]/.test(t) && t.length < 25;
+          const isSub = /^\d+[.、．]/.test(t) || /^[\d]+）/.test(t);
+          c += isSection ? '<div style="color:var(--gold);font-weight:700;font-size:15px;margin-top:20px;margin-bottom:6px;">' + hl(t) + '</div>'
+             : isHeader ? '<div style="color:var(--teal);font-weight:600;margin-top:14px;margin-bottom:4px;">' + hl(t) + '</div>'
+             : isSub ? '<div style="padding-left:12px;margin:2px 0;">' + hl(t) + '</div>'
+             : '<div style="margin:2px 0;">' + hl(t) + '</div>';
         }
-        const te = document.getElementById('note-tabs');
-        const be = document.getElementById('note-body');
-        if (te) te.innerHTML = sections.map((s,i) => '<div class="note-tab' + (i===idx?' active':'') + '" onclick="renderNoteSection(' + i + ')">' + s.title.slice(0,14) + '</div>').join('');
-        if (be) be.innerHTML = c;
-        const at = te?.querySelector('.note-tab.active');
-        if (at) at.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
-      };
+        
+        const bodyEl = document.getElementById('note-body');
+        if (bodyEl) bodyEl.innerHTML = c;
+        
+        // Update page buttons
+        const pageEl = document.getElementById('note-pages');
+        if (pageEl) {
+          let btns = '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (currentPage - 1) + ')" ' + (currentPage === 0 ? 'disabled' : '') + '>← 上一页</button>';
+          btns += '<span style="margin:0 12px;font-size:13px;color:var(--muted)">' + (currentPage + 1) + ' / ' + totalPages + '</span>';
+          btns += '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (currentPage + 1) + ')" ' + (currentPage >= totalPages - 1 ? 'disabled' : '') + '>下一页 →</button>';
+          pageEl.innerHTML = btns;
+        }
+        
+        // Update title to show page
+        document.title = source + ' (' + (currentPage + 1) + '/' + totalPages + ') · Agent Exam Training';
+      }
       
-      window.renderNoteSection = renderSec;
+      window.notePage = renderPage;
       
-      v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#note\')">← 笔记列表</button><div class="page-title">📖 ' + source + '</div><div class="page-sub"><a href="' + (data.url||'#') + '" target="_blank" style="color:var(--muted)">原网页 ↗</a> · ' + sections.length + ' 节</div></div><div class="note-tabs" id="note-tabs">' + sections.map((s,i) => '<div class="note-tab' + (i===0?' active':'') + '" onclick="renderNoteSection(' + i + ')">' + s.title.slice(0,14) + '</div>').join('') + '</div><div class="note-body" id="note-body"></div>';
-      document.title = source + ' · Agent Exam Training';
-      renderSec(0);
+      v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#note\')">← 笔记列表</button><div class="page-title">📖 ' + source + '</div><div class="page-sub"><a href="' + (data.url||'#') + '" target="_blank" style="color:var(--muted)">原网页 ↗</a></div></div><div style="padding:16px 24px 0;display:flex;justify-content:center;align-items:center;gap:8px;flex-shrink:0;" id="note-pages"></div><div class="note-body" id="note-body" style="padding-bottom:0;"></div>';
+      
+      renderPage(0);
     }).catch(() => {
       v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">加载失败</div></div>';
     });
