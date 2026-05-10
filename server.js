@@ -198,13 +198,53 @@ function userSummary(username, progress) {
   const judge = calcRate(validRecords, q => q.type === '判断题');
   const s1 = calcRate(validRecords, q => q.subject === '科目一');
   const s2 = calcRate(validRecords, q => q.subject === '科目二');
+  
+  // Calculate XP from records (deduplicated by qid, first attempt by time)
+  const sorted = Object.entries(validRecords).sort((a,b) => (a[1].time||0) - (b[1].time||0));
+  const seen = new Set();
+  const deduped = [];
+  let xp = 0, streak = 0, maxStreak = 0;
+  for (const [qid, rec] of sorted) {
+    if (seen.has(qid)) continue;
+    seen.add(qid);
+    deduped.push(rec);
+    xp += rec.correct ? 10 : 2;
+    if (rec.correct) { streak++; if (streak > maxStreak) maxStreak = streak; }
+    else streak = 0;
+  }
+  
+  // Calculate achievements from deduped records
+  const answeredCount = deduped.length;
+  const correctCount = deduped.filter(r => r?.correct).length;
+  const acc = answeredCount > 0 ? Math.round(correctCount / answeredCount * 100) : 0;
+  const wrongCount = (progress.wrong || []).length;
+  const achievements = [];
+  if (answeredCount >= 1) achievements.push('first_q');
+  if (answeredCount >= 10) achievements.push('ten_q');
+  if (answeredCount >= 50) achievements.push('fifty_q');
+  if (answeredCount >= 100) achievements.push('hundred_q');
+  if (answeredCount >= 150) achievements.push('q150');
+  if (answeredCount >= 250) achievements.push('q250');
+  if (answeredCount >= 500) achievements.push('fivehundred_q');
+  if (answeredCount >= 750) achievements.push('q750');
+  if (answeredCount >= 1000) achievements.push('thousand_q');
+  if (answeredCount >= 1500) achievements.push('q1500');
+  if (answeredCount >= 1750) achievements.push('q1750');
+  if (answeredCount >= 2091) achievements.push('all_q');
+  if (answeredCount >= 50 && acc >= 60) achievements.push('acc_60');
+  if (answeredCount >= 100 && acc >= 80) achievements.push('acc_80');
+  if (answeredCount >= 200 && acc >= 90) achievements.push('acc_90');
+  if (maxStreak >= 5) achievements.push('streak_5');
+  if (maxStreak >= 10) achievements.push('streak_10');
+  if (maxStreak >= 20) achievements.push('streak_20');
+  if (wrongCount === 0 && answeredCount >= 10) achievements.push('wrong_zero');
+  
   return {
     username,
     lastLogin: (progress.stats && progress.stats.lastLogin) || null,
     answered,
-    xp: Object.values(validRecords).reduce((sum, rec) => sum + (rec.correct ? 10 : 2), 0),
-    achievements: (progress.game && progress.game.unlocked) ? Object.keys(progress.game.unlocked) : [],
-    gameXp: (progress.game && progress.game.xp) || 0,
+    xp,
+    achievements,
     singleAccuracy: single.accuracy, singleDone: single.total,
     multiAccuracy: multi.accuracy, multiDone: multi.total,
     judgeAccuracy: judge.accuracy, judgeDone: judge.total,
