@@ -89,7 +89,7 @@ a { color:var(--gold); text-decoration:none; }
 .stat-mini .sm-sub { font-size:11px; color:var(--muted); margin-left:4px; font-weight:400; }
 
 /* 科目分类 */
-.set-grid { padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; flex:1; align-content:start; grid-auto-rows:minmax(116px,auto); }
+.set-grid { padding:20px 24px; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px; flex:1; align-content:start; grid-auto-rows:minmax(116px,auto); }
 .set-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; min-height:116px; cursor:pointer; transition:all .25s; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; }
 .set-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); opacity:0; transition:opacity .3s; }
 .set-card:hover { background:var(--bg-hover); border-color:var(--gold-dim); transform:translateY(-3px); box-shadow:0 6px 24px var(--gold-glow-s); }
@@ -99,7 +99,7 @@ a { color:var(--gold); text-decoration:none; }
 .set-card .s-progress { font-size:12px; color:var(--teal); margin-top:6px; }
 .set-card .s-bar { margin-top:8px; height:4px; background:var(--bg-panel); border-radius:2px; overflow:hidden; }
 .set-card .s-fill { height:100%; background:var(--gold-dim); border-radius:2px; }
-.set-card.section-header { cursor:default; background:transparent; border:none; padding:8px 20px 4px; min-height:auto; display:block; font-size:14px; color:var(--muted); grid-column:1/-1; }
+.set-card.section-header { cursor:default; background:transparent; border:none; padding:4px 20px 2px; min-height:auto; display:block; font-size:14px; color:var(--muted); grid-column:1/-1; }
 .set-card.section-header:hover { transform:none; box-shadow:none; }
 
 /* 刷题页 */
@@ -212,7 +212,7 @@ a { color:var(--gold); text-decoration:none; }
 @media (max-width:640px) {
   .title-logo .zh { font-size:26px; }
   .dashboard-grid { grid-template-columns:1fr 1fr; }
-  .set-grid { grid-template-columns:1fr; padding:12px 16px; }
+  .set-grid { grid-template-columns:1fr; padding:12px 12px; gap:6px; }
   .quiz-body { padding:16px; }
   .answer-sheet { width:100%; right:-100%; }
   .stats-row { gap:12px; font-size:12px; }
