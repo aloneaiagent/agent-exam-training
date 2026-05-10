@@ -202,14 +202,13 @@ function userSummary(username, progress) {
   const s1 = calcRate(validRecords, q => q.subject === '科目一');
   const s2 = calcRate(validRecords, q => q.subject === '科目二');
   
-  // XP and achievements: read from game state (same source as frontend)
-  // Fall back to calculating from records only if game state doesn't exist
+  // XP and achievements: prefer game state, fall back to calculating from records
   let xp = 0;
   let achievements = [];
   const game = progress.game;
-  if (game) {
+  if (game && game.unlocked && Object.keys(game.unlocked).length > 0) {
     xp = game.xp || 0;
-    achievements = game.unlocked ? Object.keys(game.unlocked) : [];
+    achievements = Object.keys(game.unlocked);
   } else {
     // Initial calculation for users who haven't synced game state yet
     const sorted = Object.entries(validRecords).sort((a,b) => (a[1].time||0) - (b[1].time||0));
