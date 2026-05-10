@@ -123,6 +123,7 @@ for fpath in data_files:
         "总题数": len(questions),
         "单选题": len([q for q in questions if q.get("题型") == "单选题"]),
         "多选题": len([q for q in questions if q.get("题型") == "多选题"]),
+        "判断题": len([q for q in questions if q.get("题型") == "判断题"]),
     }
 
 # Add subtotals
@@ -137,6 +138,7 @@ for subject in ["科目一", "科目二", "综合"]:
                 "总题数": sum(s["总题数"] for k, s in srcs.items() if not k.startswith("_")),
                 "单选题": sum(s["单选题"] for k, s in srcs.items() if not k.startswith("_")),
                 "多选题": sum(s["多选题"] for k, s in srcs.items() if not k.startswith("_")),
+                "判断题": sum(s["判断题"] for k, s in srcs.items() if not k.startswith("_")),
             }
 
 # Save

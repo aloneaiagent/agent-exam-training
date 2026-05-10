@@ -512,7 +512,7 @@ async function showExamPicker() {
     if(!mockGroup) continue;
     for(const [name,info] of Object.entries(mockGroup)) {
       if(name.startsWith('_')) continue;
-      html += `<div class="set-card" onclick="navigate('#exam/${encodeURIComponent(name)}')"><div class="s-title">${formatSourceName(name, km)}</div><div class="s-count">${info['总题数']} 题 · ${info['单选题']}单选${info['多选题']?` · ${info['多选题']}多选`:''}</div><div class="s-progress">限时 50 分钟 · 顺序答题</div></div>`;
+      html += `<div class="set-card" onclick="navigate('#exam/${encodeURIComponent(name)}')"><div class="s-title">${formatSourceName(name, km)}</div><div class="s-count">${info['总题数']} 题 · ${info['单选题']}单选${info['多选题']?` · ${info['多选题']}多选`:''}${info['判断题']?` · ${info['判断题']}判断`:''}</div><div class="s-progress">限时 50 分钟 · 顺序答题</div></div>`;
     }
   }
   // Also list mock files that are in 综合
@@ -534,7 +534,7 @@ async function renderSubject(subject) {
     let doneCount=0; for(const q of sq) if(progress.records[q.id]) doneCount++;
     const pct=src.total>0?Math.round(doneCount/src.total*100):0;
     const sn=formatSourceName(src.name, subject);
-    html+=`<div class="set-card" onclick="navigate('#quiz/${encodeURIComponent(src.name)}')"><div class="s-title">${sn}</div><div class="s-count">${src.total} 题 · ${sq.filter(q=>q.题型==='单选题').length}单选 ${sq.filter(q=>q.题型==='多选题').length}多选</div><div class="s-progress">已完成 ${doneCount}/${src.total}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
+    html+=`<div class="set-card" onclick="navigate('#quiz/${encodeURIComponent(src.name)}')"><div class="s-title">${sn}</div><div class="s-count">${src.total} 题 · ${sq.filter(q=>q.题型==='单选题').length}单选 ${sq.filter(q=>q.题型==='多选题').length}多选${(()=>{const jc=sq.filter(q=>q.题型==='判断题').length;return jc?` ${jc}判断`:''})()}</div><div class="s-progress">已完成 ${doneCount}/${src.total}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
   }
   html+='</div>';
   v.innerHTML=html; document.title=`${subject} · 演出经纪人`;
