@@ -534,6 +534,30 @@ function showAchievementPopup(ach, key) {
 }
 
 function renderAchievements() {
+  // Retroactively sync XP from existing records
+  const _p = loadProgress();
+  const _g = _p.game || {};
+  const _recs = Object.keys(_p.records || {}).length;
+  const _ans = (_g.answeredIds || []).length;
+  if (_recs > _ans) {
+    if (!_g.unlocked) _g.unlocked = {};
+    if (!_g.answeredIds) _g.answeredIds = [];
+    const _sorted = Object.entries(_p.records || {}).sort((a,b) => (a[1].time||0) - (b[1].time||0));
+    let _xp = 0, _s = 0, _ms = 0;
+    const _newAns = [];
+    const _seen = new Set();
+    for (const [_qid, _rec] of _sorted) {
+      if (_seen.has(_qid)) continue;
+      _seen.add(_qid); _newAns.push(_qid);
+      _xp += _rec.correct ? 10 : 2;
+      if (_rec.correct) { _s++; if (_s > _ms) _ms = _s; } else _s = 0;
+    }
+    _g.xp = _xp; _g.answeredIds = _newAns; _g.streak = _s; _g.maxStreak = _ms;
+    _p.game = _g;
+    saveProgress(_p);
+  checkAchievements();
+  }
+
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const v = document.getElementById('view-achievement');
   v.innerHTML = '';
