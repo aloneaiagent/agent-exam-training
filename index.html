@@ -1040,6 +1040,13 @@ function renderNote(source) {
         }
         if (cur.length > 0) pages.push(cur.join('\n'));
         if (pages.length === 0) pages = [rawText];
+        
+        // Merge short first page into second
+        while (pages.length >= 2) {
+          var fc = pages[0].split('\n').filter(function(l){return l.trim();}).length;
+          if (fc < 10) { pages[1] = pages[0] + '\n' + pages[1]; pages.shift(); }
+          else break;
+        }
       }
       
       var totalPages = pages.length;
