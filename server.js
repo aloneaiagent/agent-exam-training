@@ -45,10 +45,6 @@ async function initDb() {
       generated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
-  // Migration: add game column if table already existed without it
-  try {
-    await pgPool.query(`ALTER TABLE progress ADD COLUMN IF NOT EXISTS game JSONB DEFAULT '{}'`);
-  } catch(e) { /* column may already exist */ }
   // Ensure all USERS have a row
   for (const username of Object.keys(USERS)) {
     await pgPool.query(
