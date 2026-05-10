@@ -239,7 +239,7 @@ a { color:var(--gold); text-decoration:none; }
 <div class="settings-panel" id="settingsPanel"></div>
 <script>
 // ══════════════════════════════════════════════════════
-// 经纪人题库 v2 — 完整版
+// 经纪人题库 v3 — 完整版
 // ══════════════════════════════════════════════════════
 const DATA_DIR = './data';
 let indexData = null;
@@ -576,9 +576,15 @@ function renderCurrentQuestion() {
   }
   const q=qs[quizState.currentIdx]; const idx=quizState.currentIdx; const total=qs.length;
   const pct=Math.round((idx+1)/total*100); const isMulti=q.题型==='多选题';
+  const isJudge=q.题型==='判断题';
   quizState.isMulti=isMulti;
   const records = quizState.isExam ? examState.records : loadProgress().records;
   const record=records[q.id]||null; const options=q.选项||{}; const optKeys=Object.keys(options);
+  
+  // Detect real judge (true/false) vs pseudo judge (mislabeled multi-select)
+  const isRealJudge = isJudge && optKeys.length <= 2 && 
+    Object.values(options).every(v => ['对','错','正确','错误'].includes(v));
+  const judgeDisplay = {'A':'✓','B':'✗','对':'✓ 正确','错':'✗ 错误','正确':'✓ 正确','错误':'✗ 错误','A正确':'✓ 正确','B错误':'✗ 错误'};
   
   let oh='';
   for(const k of optKeys) {
@@ -587,13 +593,16 @@ function renderCurrentQuestion() {
     if(record) { if(record.correct) { cls=record.answer.includes(k)?'correct':''; } else { cls=q.答案.includes(k)?'show-correct':(record.answer.includes(k)?'wrong':''); } }
     else if(hasPrev && !record.correct) { cls=q.答案.includes(k)?'show-correct':''; }
     const selected=record&&record.answer&&record.answer.includes(k)?'selected':'';
-    oh+=`<div class="quiz-option ${selected} ${cls}" data-key="${k}" onclick="selectOption(this,${isMulti})"><span class="opt-key">${k}</span><span class="opt-text">${val}</span></div>`;
+    const optLabel = isRealJudge ? (judgeDisplay[val] || val) : val;
+    const keyLabel = isRealJudge ? '' : k;
+    oh+=`<div class="quiz-option ${selected} ${cls}" data-key="${k}" onclick="selectOption(this,${isMulti})"><span class="opt-key">${keyLabel || (k==='A'?'✓':'✗')}</span><span class="opt-text">${optLabel}</span></div>`;
   }
   
   let fb='';
   if(record!==null) { quizState.answered=true;
+    const ansLabel = isRealJudge ? (judgeDisplay[q.答案] || q.答案) : q.答案;
     fb=record.correct?`<div class="quiz-feedback correct-fb show"><span class="fb-correct">✅ 回答正确！</span></div>`
-      :`<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${q.答案}</span></div>`;
+      :`<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${ansLabel}</span></div>`;
   }
   
   const examClass = '';
@@ -606,7 +615,7 @@ function renderCurrentQuestion() {
     ${quizState.isExam?`<div class="exam-timer" id="examTimer">⏱ 剩余时间：<span class="timer-num" id="timerDisplay">${formatTime(examState.remaining)}</span></div>`:''}
     <div class="quiz-progress-top${examClass}"><span>第 ${idx+1} 题</span><div class="qpt-bar"><div class="qpt-fill" style="width:${pct}%"></div></div><span>${pct}%</span></div>
     <div class="quiz-body">
-      <div class="quiz-type-badge">${isMulti?'📌 多选题':'🔵 单选题'}${quizState.wrongMode?' · 错题复习':''}</div>
+      <div class="quiz-type-badge">${isJudge?'🔘 判断题':isMulti?'📌 多选题':'🔵 单选题'}${quizState.wrongMode?' · 错题复习':''}</div>
       <div style="font-size:12px;color:var(--muted);margin:-4px 0 12px;">来源：${formatSourceName(q.来源 || quizState.source, q.科目)}${getQuestionUrl(q)?` · <a href="${getQuestionUrl(q)}" target="_blank" rel="noopener noreferrer">原网页 ${getQuestionArticleId(q)}</a>`:''}</div>
       <div class="quiz-question">${q.题干}${q.解析?`<br><span style="font-size:13px;color:var(--muted);margin-top:8px;display:block;">💡 ${q.解析}</span>`:''}</div>
       <div class="quiz-options" id="optionsContainer">${oh}</div>
@@ -620,7 +629,7 @@ function renderCurrentQuestion() {
         ${quizState.isExam && quizState.answered && idx < total-1 ? `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>` : ''}
         ${quizState.isExam && quizState.answered && idx >= total-1 ? `<button class="btn btn-danger" onclick="submitExam()">📊 交卷</button>` : ''}
       </div>
-      <div class="shortcut-hint">快捷键: <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 选择 · <kbd>Enter</kbd> 提交 · <kbd>←</kbd><kbd>→</kbd> 翻页</div>
+      <div class="shortcut-hint">快捷键: ${isRealJudge?'<kbd>A</kbd> 正确 · <kbd>B</kbd> 错误':'<kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 选择'} · <kbd>Enter</kbd> 提交 · <kbd>←</kbd><kbd>→</kbd> 翻页</div>
     </div>
   `;
   renderSheet();
@@ -640,7 +649,14 @@ function submitAnswer() {
   const userAns = Array.from(selected).map(el=>el.dataset.key).sort().join('');
   const correctAns = q.答案;
   const settings = getSettings();
-  const isCorrect = userAns === correctAns;
+  const isMultiActual = q.题型==='多选题';
+  let isCorrect;
+  if(isMultiActual && !settings.multiStrict) {
+    // Relaxed: user's choices are all within correct answer
+    isCorrect = userAns.length > 0 && userAns.split('').every(k => correctAns.includes(k));
+  } else {
+    isCorrect = userAns === correctAns;
+  }
   
   selected.forEach(el=>{ el.classList.remove('selected'); el.classList.add(isCorrect?'correct':'wrong'); });
   if(!isCorrect) { document.querySelectorAll('.quiz-option').forEach(el=>{ if(correctAns.includes(el.dataset.key)) el.classList.add('show-correct'); }); }
@@ -664,7 +680,13 @@ function submitAnswer() {
   
   const fbHtml=isCorrect
     ? `<div class="quiz-feedback correct-fb show"><span class="fb-correct">✅ 回答正确！</span></div>`
-    : `<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${correctAns}</span></div>`;
+    : (()=>{
+      const judgeOpts = q.选项||{};
+      const isRJ = q.题型==='判断题' && Object.keys(judgeOpts).length<=2 && Object.values(judgeOpts).every(v=>['对','错','正确','错误'].includes(v));
+      const jd = {'对':'✓ 正确','错':'✗ 错误','正确':'✓ 正确','错误':'✗ 错误','A':'✓ 正确','B':'✗ 错误'};
+      const ca = isRJ ? (jd[correctAns]||correctAns) : correctAns;
+      return `<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${ca}</span></div>`;
+    })();
   const existing=document.querySelector('.quiz-feedback'); if(existing) existing.remove();
   document.querySelector('.quiz-actions').insertAdjacentHTML('beforebegin', fbHtml);
   renderSheet();
@@ -867,7 +889,7 @@ function showSettings() {
     <div class="setting-row"><div><div class="sl-label">答题音效</div><div class="sl-desc">正确/错误提示音</div></div><div class="toggle ${settings.sound?'on':''}" onclick="toggleSetting('sound')"></div></div>
     <div class="setting-row"><div><div class="sl-label">字体大小</div><div class="sl-desc">当前 ${settings.fontSize}px</div></div><div><input type="range" min="14" max="24" value="${settings.fontSize}" oninput="setFont(this.value)" style="width:100px;"></div></div>
     <div style="margin-top:20px;display:flex;gap:10px;">
-      <button class="btn btn-danger btn-small" onclick="localStorage.removeItem('${LS_KEY}');localStorage.removeItem('${SET_KEY}');navigate('#home');hideSettings()">重置所有数据</button>
+      <button class="btn btn-danger btn-small" onclick="localStorage.removeItem('${LS_KEY}_${currentUser?.username||'guest'}');localStorage.removeItem('${SET_KEY}');navigate('#home');hideSettings()">重置所有数据</button>
     </div>
   `;
   document.getElementById('settingsOverlay').classList.add('show');
