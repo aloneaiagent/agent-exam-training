@@ -248,7 +248,7 @@ async function handleApi(req, res) {
     }
 
     if (req.method === 'GET' && req.url === '/api/version') {
-      return sendJson(res, 200, { version: '2.0.0', totalQuestions: 2139, subjects: { '科目一': 923, '科目二': 791, '综合': 425 } });
+      return sendJson(res, 200, { version: '2.0.0', totalQuestions: 2091, subjects: { '科目一': 923, '科目二': 791, '综合': 425 } });
     }
 
     if (req.method === 'GET' && req.url === '/api/admin/stats') {
