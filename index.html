@@ -388,7 +388,11 @@ function getSourceSubjectHash(source) {
 function goBackFromQuestion() {
   if(quizState.isExam) { showExamPicker(); return; }
   if(quizState.wrongMode) { navigate('#review'); return; }
-  navigate(getSourceSubjectHash(quizState.source));
+  // Batch mode: source = "科目一 · 单选题 第1组" etc.
+  const src = quizState.source;
+  if(src.includes('科目一')) { navigate('#s1'); return; }
+  if(src.includes('科目二')) { navigate('#s2'); return; }
+  navigate(getSourceSubjectHash(src));
 }
 
 function getQuestionUrl(q) {
@@ -435,6 +439,7 @@ function navigate(hash) {
     case 'review': renderReview(); break;
     case 'admin': renderAdmin(); break;
     case 'wrong': renderWrongQuiz(parts[1]||null); break;
+    case 'batch': renderBatch(parts[1], parts[2], parseInt(parts[3])||0); break;
     default: renderHome();
   }
 }
@@ -524,26 +529,51 @@ async function showExamPicker() {
 // ── Subject ──
 async function renderSubject(subject) {
   const v=document.getElementById('view-subject'); await loadIndex();
-  const sources=getAllSources(subject);
   const subInfo = { '科目一':{name:'思想政治与法律基础',icon:'📘'}, '科目二':{name:'演出市场政策与经纪实务',icon:'📙'}, '综合':{name:'综合',icon:'📚'} }[subject]||{name:subject,icon:'📚'};
   let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}</div></div><div class="set-grid">`;
-  let lastType='';
-  for(const src of sources) {
-    if(src.type!==lastType) { html+=`<div class="set-card section-header">${src.type==='主题库'?'📚 主题题库':'📝 模拟试卷（独立成套）'}</div>`; lastType=src.type; }
+  
+  if (subject === '综合') {
+    // Mock exams: keep original card per source
+    const sources=getAllSources(subject);
+    let lastType='';
+    for(const src of sources) {
+      if(src.type!==lastType) { html+=`<div class="set-card section-header">📝 模拟试卷</div>`; lastType=src.type; }
+      const sq=await loadQuestions(src.file);
+      const sn=formatSourceName(src.name, subject);
+      html+=`<div class="set-card" onclick="navigate('#exam/${encodeURIComponent(src.name)}')"><div class="s-title">${sn}</div><div class="s-count">${src.total} 题 · ${sq.filter(q=>q.题型==='单选题').length}单选 ${sq.filter(q=>q.题型==='多选题').length}多选${(()=>{const jc=sq.filter(q=>q.题型==='判断题').length;return jc?` ${jc}判断`:''})()}</div><div class="s-progress">限时 50 分钟 · 顺序答题</div></div>`;
+    }
+  } else {
+    // 科目一/科目二: group by type with batch sizes
+    const BATCH = { '单选题':100, '多选题':30, '判断题':30 };
+    const TYPE_ICON = { '单选题':'🔵', '多选题':'📌', '判断题':'🔘' };
     const progress=loadProgress();
-    const sq=await loadQuestions(src.file);
-    const sn=formatSourceName(src.name, subject);
-    const typeCounts = [
-      {t:'单选题', n:sq.filter(q=>q.题型==='单选题').length, i:'🔵'},
-      {t:'多选题', n:sq.filter(q=>q.题型==='多选题').length, i:'📌'},
-      {t:'判断题', n:sq.filter(q=>q.题型==='判断题').length, i:'🔘'},
-    ].filter(x=>x.n>0);
-    for(const tc of typeCounts) {
-      const doneCount = sq.filter(q=>q.题型===tc.t && progress.records[q.id]).length;
-      const pct = tc.n>0 ? Math.round(doneCount/tc.n*100) : 0;
-      html+=`<div class="set-card" onclick="navigate('#quiz/${encodeURIComponent(src.name)}/${tc.t}')"><div class="s-title">${tc.i} ${sn}</div><div class="s-count">${tc.n} 题 · ${tc.t}</div><div class="s-progress">已完成 ${doneCount}/${tc.n}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
+    
+    for(const type of ['单选题','多选题','判断题']) {
+      // Collect all questions of this type from all sources in this subject
+      let allQs=[];
+      const sources=getAllSources(subject);
+      for(const src of sources) {
+        const sq=await loadQuestions(src.file);
+        allQs.push(...sq.filter(q=>q.题型===type));
+      }
+      if(!allQs.length) continue;
+      
+      html+=`<div class="set-card section-header">${TYPE_ICON[type]} ${type}（共 ${allQs.length} 题）</div>`;
+      
+      const batchSize = BATCH[type];
+      const numBatches = Math.ceil(allQs.length / batchSize);
+      for(let b=0; b<numBatches; b++) {
+        const start = b * batchSize;
+        const end = Math.min(start + batchSize, allQs.length);
+        const batchQs = allQs.slice(start, end);
+        const doneCount = batchQs.filter(q=>progress.records[q.id]).length;
+        const pct = batchQs.length>0 ? Math.round(doneCount/batchQs.length*100) : 0;
+        const batchLabel = numBatches > 1 ? ` 第${b+1}组` : '';
+        html+=`<div class="set-card" onclick="navigate('#batch/${subject}/${type}/${b}')"><div class="s-title">${TYPE_ICON[type]} ${type}${batchLabel}</div><div class="s-count">${batchQs.length} 题（${start+1}-${end}）</div><div class="s-progress">已完成 ${doneCount}/${batchQs.length}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
+      }
     }
   }
+  
   html+='</div>';
   v.innerHTML=html; document.title=`${subject} · 演出经纪人`;
   document.getElementById('view-subject').classList.add('active');
@@ -580,6 +610,41 @@ async function renderQuiz(source, typeOrIdx) {
   
   quizState.questions=qs; quizState.currentIdx=idx; quizState.source=source; quizState.answered=false; quizState.isExam=false; quizState.wrongMode=false;
   quizState.quizType = quizType;
+  renderCurrentQuestion();
+  document.getElementById('view-quiz').classList.add('active');
+}
+
+// ── Batch Quiz (type-based grouped practice) ──
+async function renderBatch(subject, type, batchIdx) {
+  const v=document.getElementById('view-quiz'); await loadIndex();
+  const BATCH = { '单选题':100, '多选题':30, '判断题':30 };
+  const batchSize = BATCH[type] || 100;
+  
+  // Collect all questions of this type from this subject
+  let allQs=[];
+  const sources=getAllSources(subject);
+  for(const src of sources) {
+    const sq=await loadQuestions(src.file);
+    allQs.push(...sq.filter(q=>q.题型===type));
+  }
+  
+  const start = batchIdx * batchSize;
+  const end = Math.min(start + batchSize, allQs.length);
+  const qs = allQs.slice(start, end);
+  
+  if(!qs.length) {
+    v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">题库未找到</div></div>';
+    v.classList.add('active'); return;
+  }
+  
+  let idx = 0;
+  const progress = loadProgress();
+  for(let i=0; i<qs.length; i++) { if(!progress.records[qs[i].id]) { idx=i; break; } }
+  idx = Math.max(0, Math.min(idx, qs.length-1));
+  
+  const batchLabel = qs.length < batchSize ? `${start+1}-${end}` : `第${batchIdx+1}组`;
+  quizState.questions=qs; quizState.currentIdx=idx; quizState.source=`${subject} · ${type} ${batchLabel}`;
+  quizState.answered=false; quizState.isExam=false; quizState.wrongMode=false; quizState.quizType=null;
   renderCurrentQuestion();
   document.getElementById('view-quiz').classList.add('active');
 }
