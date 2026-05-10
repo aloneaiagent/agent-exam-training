@@ -15,12 +15,9 @@ SUBJECT_MAP = {
 
 # Exact-filename subject override for files that don't fit prefix patterns
 SUBJECT_OVERRIDE = {
-    "ycjjr-108319": "综合",
-    "ycjjr-108320": "综合",
-    "ycjjr-108324": "综合",
-    "ycjjr-108325": "综合",
-    "ycjjr-108327": "综合",
     "ycjjr-108348": "综合",
+    "ycjjr-policy-merged": "综合",
+    "ycjjr-stage-merged": "综合",
 }
 
 TYPE_MAP = {
@@ -28,11 +25,9 @@ TYPE_MAP = {
     "s2-qb-": "主题库",
     "mock-": "模拟卷",
     "other-": "主题库",
-    "ycjjr-108319": "模拟卷",
-    "ycjjr-108320": "模拟卷",
-    "ycjjr-108324": "模拟卷",
-    "ycjjr-108325": "模拟卷",
-    "ycjjr-108327": "模拟卷",
+    "mock-merged": "模拟卷",
+    "ycjjr-policy-merged": "模拟卷",
+    "ycjjr-stage-merged": "模拟卷",
     "ycjjr-108348": "模拟卷",
 }
 
@@ -63,15 +58,9 @@ SOURCE_NAMES = {
     "s2-qb-11": "演出市场政策与经纪实务_考试题库一",
     "s2-qb-12": "演出市场政策与经纪实务_考试题库二",
     "s2-qb-13": "演出市场政策与经纪实务_考试题库三",
-    "mock-01": "模拟试题（常考点）",
-    "mock-02": "模拟试题（常考点2）",
-    "mock-03": "模拟题",
-    "other-01": "精编版",
-    "ycjjr-108319": "政策法规与经纪实务模拟题一",
-    "ycjjr-108320": "政策法规与经纪实务模拟题二",
-    "ycjjr-108324": "舞台艺术基础知识模拟题一",
-    "ycjjr-108325": "舞台艺术基础知识模拟题二",
-    "ycjjr-108327": "政策法规与经纪实务模拟题三",
+    "mock-merged": "模拟卷合集",
+    "ycjjr-policy-merged": "政策法规与经纪实务模拟题合集",
+    "ycjjr-stage-merged": "舞台艺术基础知识模拟题合集",
     "ycjjr-108348": "舞台艺术基础知识考试练习题",
 }
 
