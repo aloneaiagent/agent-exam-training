@@ -1019,12 +1019,33 @@ function renderNote(source) {
       
       const lines = data.text.split('\n').filter(l => l.trim());
       
-      // Split into pages: ~40 lines per page
-      const PER_PAGE = 40;
-      const totalPages = Math.max(1, Math.ceil(lines.length / PER_PAGE));
+      // Split into sections at natural boundaries
+      const sectionHeaders = /^(第[一二三四五六七八九十]+[部分章节篇]|第[一二三四五六七八九十]+节)/;
+      let sections = [];
+      let cur = [];
+      for (const line of lines) {
+        const t = line.trim();
+        if (sectionHeaders.test(t) && cur.length > 0) {
+          sections.push(cur);
+          cur = [line];
+        } else {
+          cur.push(line);
+        }
+      }
+      if (cur.length > 0) sections.push(cur);
+      
+      // If no section breaks found, treat whole content as one section
+      if (sections.length === 0) sections = [lines];
+      
+      // Group sections into pages: max 2 sections per page (so a part/chapter stays intact)
+      const MAX_SECTIONS_PER_PAGE = 2;
       let pages = [];
-      for (let i = 0; i < lines.length; i += PER_PAGE) {
-        pages.push(lines.slice(i, i + PER_PAGE));
+      for (let i = 0; i < sections.length; i += MAX_SECTIONS_PER_PAGE) {
+        const merged = [];
+        for (let j = i; j < i + MAX_SECTIONS_PER_PAGE && j < sections.length; j++) {
+          merged.push.apply(merged, sections[j]);
+        }
+        pages.push(merged);
       }
       
       const hl = (text) => text.replace(/(必考|超级[^。]*重点|常考|重点|题库|重要|全部记住|必须记住|只能做成小卡片)/g, '<span style="color:var(--red);font-weight:600">$1</span>');
@@ -1052,7 +1073,6 @@ function renderNote(source) {
         const bodyEl = document.getElementById('note-body');
         if (bodyEl) bodyEl.innerHTML = c;
         
-        // Update page buttons
         const pageEl = document.getElementById('note-pages');
         if (pageEl) {
           let btns = '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (currentPage - 1) + ')" ' + (currentPage === 0 ? 'disabled' : '') + '>← 上一页</button>';
@@ -1060,12 +1080,12 @@ function renderNote(source) {
           btns += '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (currentPage + 1) + ')" ' + (currentPage >= totalPages - 1 ? 'disabled' : '') + '>下一页 →</button>';
           pageEl.innerHTML = btns;
         }
-        
-        // Update title to show page
         document.title = source + ' (' + (currentPage + 1) + '/' + totalPages + ') · Agent Exam Training';
       }
       
       window.notePage = renderPage;
+      // Compute totalPages from pages array
+      var totalPages = pages.length;
       
       v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#note\')">← 笔记列表</button><div class="page-title">📖 ' + source + '</div><div class="page-sub"><a href="' + (data.url||'#') + '" target="_blank" style="color:var(--muted)">原网页 ↗</a></div></div><div style="padding:16px 24px 0;display:flex;justify-content:center;align-items:center;gap:8px;flex-shrink:0;" id="note-pages"></div><div class="note-body" id="note-body" style="padding-bottom:0;"></div>';
       
