@@ -420,10 +420,11 @@ async function loadIndex() { if(indexData) return indexData; const r=await fetch
 async function loadQuestions(fn) { if(questionCache[fn]) return questionCache[fn]; const r=await fetch(`${DATA_DIR}/${fn}`, {cache:'no-store'}); questionCache[fn]=await r.json(); return questionCache[fn]; }
 async function loadAllQuestionMeta() {
   if(allQuestionMeta) return allQuestionMeta;
-  const r = await fetch(`${DATA_DIR}/all_questions.json`, {cache:'no-store'});
-  const arr = await r.json();
+  const r = await fetch(`${DATA_DIR}/meta.json`, {cache:'no-store'});
+  const raw = await r.json();
+  // Adapt lightweight meta format: {qid: {t:题型, s:科目}} -> {qid: {type, subject}}
   allQuestionMeta = {};
-  for(const q of arr) allQuestionMeta[q.id] = { type:q['题型']||'', subject:q['科目']||'' };
+  for(const [qid, m] of Object.entries(raw)) allQuestionMeta[qid] = { type: m.t||'', subject: m.s||'' };
   return allQuestionMeta;
 }
 function calcRate(records, predicate) {
@@ -1081,7 +1082,7 @@ function renderChangelog() {
   v.innerHTML=`
     <div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📜 版本更新记录</div><div class="page-sub">题库演练系统 V7</div></div>
     <div style="max-width:700px;margin:0 auto;padding:20px 24px;">
-      <div class="cl-item"><span class="cl-ver">V7</span><span class="cl-date">2026-05-11</span><div class="cl-desc"><span class="tag tag-ref">改版</span> 科目页面并行加载13源文件·即时渲染 <span class="tag tag-fix">修复</span> PostgreSQL持久化game列（XP/成就跨会话保留） <span class="tag tag-fix">修正</span> 思想政治与法律_二#4题干补逗号</div></div>
+      <div class="cl-item"><span class="cl-ver">V7</span><span class="cl-date">2026-05-11</span><div class="cl-desc"><span class="tag tag-ref">改版</span> 科目页面并行加载13源文件·即时渲染 <span class="tag tag-ref">改版</span> 登录加载meta.json替代1.1MB完整题库（9x提速） <span class="tag tag-fix">修复</span> PostgreSQL持久化game列（XP/成就跨会话保留） <span class="tag tag-fix">修正</span> 思想政治与法律_二#4题干补逗号</div></div>
       <div class="cl-item"><span class="cl-ver">V6</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 🏆游戏化成就系统（XP等级+21项成就+弹窗） <span class="tag tag-add">新增</span> 回溯计算历史记录XP <span class="tag tag-add">新增</span> 称号一览弹窗（👑查看全部15级称号） <span class="tag tag-add">新增</span> 成长/对局/专精/社交分类标签 <span class="tag tag-add">新增</span> 后台统计增加XP和成就列 <span class="tag tag-add">新增</span> 答题实时增加XP <span class="tag tag-add">新增</span> 启动自动同步游戏状态 <span class="tag tag-ref">改版</span> XP进度条视觉化（含等级两端标注） <span class="tag tag-ref">改版</span> 后台统计成就改数字计数 <span class="tag tag-ref">改版</span> 成就系统独立模块文件 <span class="tag tag-ref">改版</span> 等级XP移至首页标题下方 <span class="tag tag-ref">改版</span> 连击成就图标5️⃣🔟红色20 <span class="tag tag-fix">修复</span> PostgreSQL持久化game列 <span class="tag tag-fix">修复</span> 后台XP/成就统一读game状态 <span class="tag tag-fix">修复</span> 成就不显示路由函数名错误 <span class="tag tag-fix">修复</span> 首页等级显示? <span class="tag tag-fix">修复</span> 后台metricRows重复 <span class="tag tag-fix">修复</span> 上一题按钮disabled样式 <span class="tag tag-fix">修复</span> XP归零（PG缺game列）</div></div>
       <div class="cl-item"><span class="cl-ver">V5</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 📖考点笔记功能（考试大纲篇 & 重要考点篇） <span class="tag tag-add">新增</span> 爬取108322/108323两篇学习笔记 <span class="tag tag-add">新增</span> 底部翻页按钮 <span class="tag tag-add">新增</span> 翻页自动滚动到顶部 <span class="tag tag-add">新增</span> 红色高亮重点（必考/常考/题库） <span class="tag tag-fix">修复</span> 30道多选题补充缺失的E/F选项 <span class="tag tag-fix">修复</span> 5道判断题→多选题（恢复真实选项） <span class="tag tag-fix">修复</span> 舞台模拟题二#4选项D合并到C已拆分 <span class="tag tag-fix">修复</span> 舞台模拟题二#18缺失选项B <span class="tag tag-fix">修复</span> 20道多选题答案小写→大写（判分异常） <span class="tag tag-fix">修复</span> 后台统计按钮被考点笔记容器点击覆盖 <span class="tag tag-fix">修复</span> 清理死代码和空引用 <span class="tag tag-ref">改版</span> 笔记按原网站分页符翻页 <span class="tag tag-ref">改版</span> 大纲篇按章节分页 <span class="tag tag-ref">改版</span> Made by Sisyphus</div></div>
       <div class="cl-item"><span class="cl-ver">V4</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 题型独立分组（100单选/30多选/30判断一组） <span class="tag tag-add">新增</span> 模拟卷合并为3套 <span class="tag tag-add">新增</span> 模拟考未做题也显示上下题按钮 <span class="tag tag-ref">改版</span> 去掉题型标题行，数量标在科目头部 <span class="tag tag-add">新增</span> 答题卡新增判断题分区 <span class="tag tag-ref">改版</span> 解析从题干独立到选项下方 <span class="tag tag-fix">修复</span> 判断题UI显示（✓/✗） <span class="tag tag-fix">修复</span> multiStrict判分开关生效 <span class="tag tag-fix">修复</span> 重置数据按钮对登录用户无效</div></div>

@@ -157,6 +157,13 @@ with open(os.path.join(DATA_DIR, "index.json"), 'w', encoding='utf-8') as f:
 with open(os.path.join(DATA_DIR, "all_questions.json"), 'w', encoding='utf-8') as f:
     json.dump(all_questions, f, ensure_ascii=False, indent=2)
 
+# Generate lightweight meta file (qid -> {type, subject}) for fast loading
+meta = {}
+for q in all_questions:
+    if q.get('id'): meta[q['id']] = {'t': q.get('题型',''), 's': q.get('科目','')}
+with open(os.path.join(DATA_DIR, "meta.json"), 'w', encoding='utf-8') as f:
+    json.dump(meta, f, ensure_ascii=False)
+
 print(f"✅ 索引构建完成！")
 print(f"   总题目数: {len(all_questions)}")
 for subject in ["科目一", "科目二", "综合"]:
