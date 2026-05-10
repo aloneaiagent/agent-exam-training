@@ -130,6 +130,7 @@ a { color:var(--gold); text-decoration:none; }
 .quiz-feedback.wrong-fb { background:rgba(232,93,93,.10); border:1px solid rgba(232,93,93,.25); }
 .quiz-feedback .fb-correct { color:var(--green); }
 .quiz-feedback .fb-wrong { color:var(--red); }
+.quiz-hint { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:18px; color:var(--muted); font-size:13px; line-height:1.6; }
 
 .quiz-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:auto; }
 .btn { padding:10px 20px; border:1px solid var(--border); border-radius:var(--radius-sm); cursor:pointer; font-size:14px; transition:all .2s; font-family:var(--font); }
@@ -429,7 +430,7 @@ function navigate(hash) {
     case 'home': renderHome(); break;
     case 's1': renderSubject('科目一'); break;
     case 's2': renderSubject('科目二'); break;
-    case 'quiz': renderQuiz(parts[1], parts.length>2 ? parseInt(parts[2]) : null); break;
+    case 'quiz': renderQuiz(parts[1], parts.length>2 ? parts[2] : null); break;
     case 'exam': renderExam(parts[1]); break;
     case 'review': renderReview(); break;
     case 'admin': renderAdmin(); break;
@@ -531,10 +532,17 @@ async function renderSubject(subject) {
     if(src.type!==lastType) { html+=`<div class="set-card section-header">${src.type==='主题库'?'📚 主题题库':'📝 模拟试卷（独立成套）'}</div>`; lastType=src.type; }
     const progress=loadProgress();
     const sq=await loadQuestions(src.file);
-    let doneCount=0; for(const q of sq) if(progress.records[q.id]) doneCount++;
-    const pct=src.total>0?Math.round(doneCount/src.total*100):0;
     const sn=formatSourceName(src.name, subject);
-    html+=`<div class="set-card" onclick="navigate('#quiz/${encodeURIComponent(src.name)}')"><div class="s-title">${sn}</div><div class="s-count">${src.total} 题 · ${sq.filter(q=>q.题型==='单选题').length}单选 ${sq.filter(q=>q.题型==='多选题').length}多选${(()=>{const jc=sq.filter(q=>q.题型==='判断题').length;return jc?` ${jc}判断`:''})()}</div><div class="s-progress">已完成 ${doneCount}/${src.total}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
+    const typeCounts = [
+      {t:'单选题', n:sq.filter(q=>q.题型==='单选题').length, i:'🔵'},
+      {t:'多选题', n:sq.filter(q=>q.题型==='多选题').length, i:'📌'},
+      {t:'判断题', n:sq.filter(q=>q.题型==='判断题').length, i:'🔘'},
+    ].filter(x=>x.n>0);
+    for(const tc of typeCounts) {
+      const doneCount = sq.filter(q=>q.题型===tc.t && progress.records[q.id]).length;
+      const pct = tc.n>0 ? Math.round(doneCount/tc.n*100) : 0;
+      html+=`<div class="set-card" onclick="navigate('#quiz/${encodeURIComponent(src.name)}/${tc.t}')"><div class="s-title">${tc.i} ${sn}</div><div class="s-count">${tc.n} 题 · ${tc.t}</div><div class="s-progress">已完成 ${doneCount}/${tc.n}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
+    }
   }
   html+='</div>';
   v.innerHTML=html; document.title=`${subject} · 演出经纪人`;
@@ -542,13 +550,25 @@ async function renderSubject(subject) {
 }
 
 // ── Quiz State ──
-let quizState = { questions:[], currentIdx:0, source:'', answered:false, isMulti:false, isExam:false, wrongMode:false };
+let quizState = { questions:[], currentIdx:0, source:'', answered:false, isMulti:false, isExam:false, wrongMode:false, quizType:null };
 let examState = { records:{}, startedAt:null, remaining:0, submitted:false };
 
-async function renderQuiz(source, startIdx) {
+async function renderQuiz(source, typeOrIdx) {
   const v=document.getElementById('view-quiz'); await loadIndex();
-  const qs=await getQuestionsBySource(source);
+  let qs=await getQuestionsBySource(source);
   if(!qs) { v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">题库未找到</div></div>'; v.classList.add('active'); return; }
+  
+  // typeOrIdx: type string ('单选题'/'多选题'/'判断题') or number index or null
+  const QUIZ_TYPES = {'单选题':true,'多选题':true,'判断题':true};
+  let quizType = null;
+  let startIdx = null;
+  if (typeOrIdx && QUIZ_TYPES[typeOrIdx]) {
+    quizType = typeOrIdx;
+    qs = qs.filter(q => q.题型 === quizType);
+  } else if (typeOrIdx !== null) {
+    startIdx = parseInt(typeOrIdx);
+    if (isNaN(startIdx)) startIdx = null;
+  }
   
   // Resume from first unanswered when no explicit index is provided
   let idx = Number.isInteger(startIdx) ? startIdx : 0;
@@ -559,6 +579,7 @@ async function renderQuiz(source, startIdx) {
   idx = Math.max(0, Math.min(idx, qs.length-1));
   
   quizState.questions=qs; quizState.currentIdx=idx; quizState.source=source; quizState.answered=false; quizState.isExam=false; quizState.wrongMode=false;
+  quizState.quizType = quizType;
   renderCurrentQuestion();
   document.getElementById('view-quiz').classList.add('active');
 }
@@ -609,7 +630,7 @@ function renderCurrentQuestion() {
   v.innerHTML=`
     <div class="page-header">
       <button class="back-btn" onclick="goBackFromQuestion()">← 返回</button>
-      <div class="page-title">${quizState.isExam?`📝 ${formatSourceName(quizState.source)}`:quizState.wrongMode?'🔄 错题循环':formatSourceName(quizState.source)}</div>
+      <div class="page-title">${quizState.isExam?`📝 ${formatSourceName(quizState.source)}`:quizState.wrongMode?'🔄 错题循环':formatSourceName(quizState.source)}${quizState.quizType?` · ${quizState.quizType}`:''}</div>
       <div class="page-sub" style="cursor:pointer" onclick="toggleSheet()">${idx+1}/${total} 📋</div>
     </div>
     ${quizState.isExam?`<div class="exam-timer" id="examTimer">⏱ 剩余时间：<span class="timer-num" id="timerDisplay">${formatTime(examState.remaining)}</span></div>`:''}
@@ -617,8 +638,9 @@ function renderCurrentQuestion() {
     <div class="quiz-body">
       <div class="quiz-type-badge">${isJudge?'🔘 判断题':isMulti?'📌 多选题':'🔵 单选题'}${quizState.wrongMode?' · 错题复习':''}</div>
       <div style="font-size:12px;color:var(--muted);margin:-4px 0 12px;">来源：${formatSourceName(q.来源 || quizState.source, q.科目)}${getQuestionUrl(q)?` · <a href="${getQuestionUrl(q)}" target="_blank" rel="noopener noreferrer">原网页 ${getQuestionArticleId(q)}</a>`:''}</div>
-      <div class="quiz-question">${q.题干}${q.解析?`<br><span style="font-size:13px;color:var(--muted);margin-top:8px;display:block;">💡 ${q.解析}</span>`:''}</div>
+      <div class="quiz-question">${q.题干}</div>
       <div class="quiz-options" id="optionsContainer">${oh}</div>
+      ${q.解析?`<div class="quiz-hint">💡 ${q.解析}</div>`:''}
       ${fb}
       <div class="quiz-actions">
         ${!quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>提交答案</button>`:''}
@@ -719,15 +741,17 @@ function renderSheet() {
   const sheet=document.getElementById('answerSheet'), overlay=document.getElementById('sheetOverlay');
   const qs=quizState.questions; if(!qs.length) return;
   const records = quizState.isExam ? examState.records : loadProgress().records;
-  let singleHtml='', multiHtml='';
+  let singleHtml='', multiHtml='', judgeHtml='';
   qs.forEach((q,i)=>{
     const rec=records[q.id]; let cls='';
     if(rec) cls=rec.correct?'done-correct':'done-wrong';
     if(i===quizState.currentIdx) cls+=' current';
     const dot=`<div class="as-dot ${cls}" onclick="goToQuestion(${i})">${i+1}</div>`;
-    if(q.题型==='多选题') multiHtml+=dot; else singleHtml+=dot;
+    if(q.题型==='多选题') multiHtml+=dot;
+    else if(q.题型==='判断题') judgeHtml+=dot;
+    else singleHtml+=dot;
   });
-  sheet.innerHTML=`<button class="as-close" onclick="toggleSheet()">✕</button><div class="as-title">📋 答题卡</div><div class="as-section"><div class="as-stitle">单选题 ${qs.filter(q=>q.题型==='单选题').length} 题</div><div class="as-grid">${singleHtml}</div></div>${multiHtml?`<div class="as-section"><div class="as-stitle">多选题 ${qs.filter(q=>q.题型==='多选题').length} 题</div><div class="as-grid">${multiHtml}</div></div>`:''}<div class="as-legend"><span class="lg"><span class="dot" style="background:var(--green-dim);border:1px solid var(--green)"></span> 正确</span><span class="lg"><span class="dot" style="background:rgba(232,93,93,.15);border:1px solid var(--red)"></span> 错误</span><span class="lg"><span class="dot" style="background:var(--bg-card);border:1px solid var(--border)"></span> 未答</span></div>`;
+  sheet.innerHTML=`<button class="as-close" onclick="toggleSheet()">✕</button><div class="as-title">📋 答题卡</div>${singleHtml?`<div class="as-section"><div class="as-stitle">单选题 ${qs.filter(q=>q.题型==='单选题').length} 题</div><div class="as-grid">${singleHtml}</div></div>`:''}${multiHtml?`<div class="as-section"><div class="as-stitle">多选题 ${qs.filter(q=>q.题型==='多选题').length} 题</div><div class="as-grid">${multiHtml}</div></div>`:''}${judgeHtml?`<div class="as-section"><div class="as-stitle">判断题 ${qs.filter(q=>q.题型==='判断题').length} 题</div><div class="as-grid">${judgeHtml}</div></div>`:''}<div class="as-legend"><span class="lg"><span class="dot" style="background:var(--green-dim);border:1px solid var(--green)"></span> 正确</span><span class="lg"><span class="dot" style="background:rgba(232,93,93,.15);border:1px solid var(--red)"></span> 错误</span><span class="lg"><span class="dot" style="background:var(--bg-card);border:1px solid var(--border)"></span> 未答</span></div>`;
   overlay.onclick=toggleSheet;
 }
 
@@ -741,7 +765,7 @@ async function renderExam(source) {
   
   // Reset exam answers (exam mode must not reuse practice records)
   examState = { records:{}, startedAt:Date.now(), remaining:50*60, submitted:false };
-  quizState.questions=qs; quizState.currentIdx=0; quizState.source=source; quizState.answered=false; quizState.isMulti=false; quizState.isExam=true; quizState.wrongMode=false;
+  quizState.questions=qs; quizState.currentIdx=0; quizState.source=source; quizState.answered=false; quizState.isMulti=false; quizState.isExam=true; quizState.wrongMode=false; quizState.quizType=null;
   
   // Start timer
   if(examTimer) clearInterval(examTimer);
@@ -812,7 +836,7 @@ async function renderWrongQuiz(source) {
   }
   if(!wrongQs.length) { renderReview(); return; }
   
-  quizState.questions=wrongQs; quizState.currentIdx=0; quizState.source='错题'; quizState.answered=false; quizState.isMulti=false; quizState.isExam=false; quizState.wrongMode=true;
+  quizState.questions=wrongQs; quizState.currentIdx=0; quizState.source='错题'; quizState.answered=false; quizState.isMulti=false; quizState.isExam=false; quizState.wrongMode=true; quizState.quizType=null;
   renderCurrentQuestion();
   document.getElementById('view-quiz').classList.add('active');
 }
