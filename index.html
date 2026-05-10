@@ -640,40 +640,74 @@ async function renderSubject(subject) {
     const TYPE_ICON = { '单选题':'🔵', '多选题':'📌', '判断题':'🔘' };
     const progress=loadProgress();
     
-    // Pre-load all questions for this subject once
-    const allQuestions = [];
-    const sources=getAllSources(subject);
-    for(const src of sources) {
-      const sq=await loadQuestions(src.file);
-      allQuestions.push(...sq);
+    // Use index.json for type counts (instant, no fetch needed)
+    const idx = indexData;
+    let byTypeCounts = { '单选题':0, '多选题':0, '判断题':0 };
+    if (idx && idx[subject] && idx[subject]['主题库']) {
+      const lib = idx[subject]['主题库'];
+      for (const [name, info] of Object.entries(lib)) {
+        if (name.startsWith('_')) continue;
+        byTypeCounts['单选题'] += info['单选题'] || 0;
+        byTypeCounts['多选题'] += info['多选题'] || 0;
+        byTypeCounts['判断题'] += info['判断题'] || 0;
+      }
     }
     
-    // Group by type and build header summary
-    let byType = {};
-    for(const type of ['单选题','多选题','判断题']) {
-      byType[type] = allQuestions.filter(q=>q.题型===type);
-    }
-    let typeSummary = Object.entries(byType).filter(([,qs])=>qs.length).map(([t,qs])=>` ${TYPE_ICON[t]}${qs.length}`).join('');
-    
+    let typeSummary = Object.entries(byTypeCounts).filter(([,n])=>n>0).map(([t,n])=>` ${TYPE_ICON[t]}${n}`).join('');
     let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}${typeSummary}</div></div><div class="set-grid">`;
     
+    // Render cards immediately with counts from index (progress shows "加载中")
     for(const type of ['单选题','多选题','判断题']) {
-      const allQs = byType[type];
-      if(!allQs.length) continue;
+      const total = byTypeCounts[type];
+      if(!total) continue;
       const batchSize = BATCH[type];
-      const numBatches = Math.ceil(allQs.length / batchSize);
+      const numBatches = Math.ceil(total / batchSize);
       for(let b=0; b<numBatches; b++) {
         const start = b * batchSize;
-        const end = Math.min(start + batchSize, allQs.length);
-        const batchQs = allQs.slice(start, end);
-        const doneCount = batchQs.filter(q=>progress.records[q.id]).length;
-        const pct = batchQs.length>0 ? Math.round(doneCount/batchQs.length*100) : 0;
+        const end = Math.min(start + batchSize, total);
         const batchLabel = numBatches > 1 ? ` 第${b+1}组` : '';
-        html+=`<div class="set-card" onclick="navigate('#batch/${subject}/${type}/${b}')"><div class="s-title">${TYPE_ICON[type]} ${type}${batchLabel}</div><div class="s-count">${batchQs.length} 题（${start+1}-${end}）</div><div class="s-progress">已完成 ${doneCount}/${batchQs.length}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
+        html+=`<div class="set-card" id="batch-${subject}-${type}-${b}" onclick="navigate('#batch/${subject}/${type}/${b}')"><div class="s-title">${TYPE_ICON[type]} ${type}${batchLabel}</div><div class="s-count">${end-start+1} 题（${start+1}-${end}）</div><div class="s-progress" style="color:var(--muted)">加载中...</div></div>`;
       }
     }
     html+='</div>';
     v.innerHTML=html;
+    document.title=`${subject} · 演出经纪人`;
+    document.getElementById('view-subject').classList.add('active');
+    
+    // Fire ALL question loads in PARALLEL, not one at a time
+    const sources=getAllSources(subject);
+    Promise.all(sources.map(src => loadQuestions(src.file))).then(allSrcQs => {
+      // Flatten all questions
+      const allQs = [];
+      for(const sq of allSrcQs) allQs.push(...sq);
+      
+      // Update progress for each batch card
+      for(const type of ['单选题','多选题','判断题']) {
+        const typeQs = allQs.filter(q => q.题型 === type);
+        const batchSize = BATCH[type];
+        const numBatches = Math.ceil(typeQs.length / batchSize);
+        for(let b=0; b<numBatches; b++) {
+          const start = b * batchSize;
+          const batchQs = typeQs.slice(start, start + batchSize);
+          const doneCount = batchQs.filter(q => progress.records[q.id]).length;
+          const pct = batchQs.length > 0 ? Math.round(doneCount / batchQs.length * 100) : 0;
+          const card = document.getElementById(`batch-${subject}-${type}-${b}`);
+          if(card) {
+            const progEl = card.querySelector('.s-progress');
+            if(progEl) {
+              progEl.textContent = `已完成 ${doneCount}/${batchQs.length}${pct>0?` (${pct}%)`:''}`;
+              progEl.style.color = '';
+            }
+            if(doneCount > 0) {
+              const bar = document.createElement('div');
+              bar.className = 's-bar';
+              bar.innerHTML = `<div class="s-fill" style="width:${pct}%"></div>`;
+              card.appendChild(bar);
+            }
+          }
+        }
+      }
+    });
   }
   
   document.title=`${subject} · 演出经纪人`;
