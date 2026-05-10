@@ -11,6 +11,7 @@ SUBJECT_MAP = {
     "s2-qb-": "科目二",
     "mock-": "综合",
     "other-": "综合",
+    "note-": "综合",
 }
 
 # Exact-filename subject override for files that don't fit prefix patterns
@@ -29,6 +30,7 @@ TYPE_MAP = {
     "ycjjr-policy-merged": "模拟卷",
     "ycjjr-stage-merged": "模拟卷",
     "ycjjr-108348": "模拟卷",
+    "note-": "考点笔记",
 }
 
 SOURCE_NAMES = {
@@ -62,6 +64,8 @@ SOURCE_NAMES = {
     "ycjjr-policy-merged": "政策法规与经纪实务模拟题合集",
     "ycjjr-stage-merged": "舞台艺术基础知识模拟题合集",
     "ycjjr-108348": "舞台艺术基础知识考试练习题",
+    "note-108322": "舞台艺术基础知识考试重要考点",
+    "note-108323": "舞台艺术基础知识考试大纲",
 }
 
 # 找到所有 json 文件 (排除 index.json, all_questions.json)
@@ -83,8 +87,6 @@ for fpath in data_files:
     if not questions:
         continue
 
-    all_questions.extend(questions)
-
     # Determine subject and type from prefix (or exact override)
     subject = "综合"
     qtype = "主题库"
@@ -103,9 +105,28 @@ for fpath in data_files:
     source_name = SOURCE_NAMES.get(fname, fname)
 
     if subject not in index:
-        index[subject] = {"主题库": {}, "模拟卷": {}}
+        index[subject] = {"主题库": {}, "模拟卷": {}, "考点笔记": {}}
     if qtype not in index[subject]:
         index[subject][qtype] = {}
+
+    if qtype == "考点笔记" or isinstance(questions, dict):
+        if isinstance(questions, dict) and qtype != "考点笔记":
+            qtype = "考点笔记"
+            if subject not in index:
+                index[subject] = {"主题库": {}, "模拟卷": {}, "考点笔记": {}}
+            if qtype not in index[subject]:
+                index[subject][qtype] = {}
+        # Note files: not added to all_questions, just index
+        index[subject][qtype][source_name] = {
+            "文件": f"{fname}.json",
+            "总题数": 0,
+            "单选题": 0,
+            "多选题": 0,
+            "判断题": 0,
+        }
+        continue
+
+    all_questions.extend(questions)
 
     index[subject][qtype][source_name] = {
         "文件": f"{fname}.json",
@@ -118,8 +139,8 @@ for fpath in data_files:
 # Add subtotals
 for subject in ["科目一", "科目二", "综合"]:
     if subject not in index:
-        index[subject] = {"主题库": {}, "模拟卷": {}}
-    for qtype in ["主题库", "模拟卷"]:
+        index[subject] = {"主题库": {}, "模拟卷": {}, "考点笔记": {}}
+    for qtype in ["主题库", "模拟卷", "考点笔记"]:
         srcs = index[subject][qtype]
         if srcs:
             index[subject][qtype]["_小计"] = {

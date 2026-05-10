@@ -248,6 +248,7 @@ a { color:var(--gold); text-decoration:none; }
 <div id="view-review" class="view"></div>
 <div id="view-admin" class="view"></div>
 <div id="view-changelog" class="view"></div>
+<div id="view-note" class="view"></div>
 
 <div class="answer-sheet-overlay" id="sheetOverlay"></div>
 <div class="answer-sheet" id="answerSheet"></div>
@@ -456,6 +457,7 @@ function navigate(hash) {
     case 'changelog': renderChangelog(); break;
     case 'wrong': renderWrongQuiz(parts[1]||null); break;
     case 'batch': renderBatch(parts[1], parts[2], parseInt(parts[3])||0); break;
+    case 'note': renderNote(parts[1]||null); break;
     default: renderHome();
   }
 }
@@ -503,7 +505,8 @@ async function renderHome() {
       <div class="dash-card" onclick="navigate('#review')"><div class="icon">📕</div><div class="label">错题本</div><div class="count">${wc} 题待复习</div><div class="detail" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc>0?'⚠ 需要巩固':'✅ 暂无错题'}</div></div>
       <div class="dash-card" onclick="showExamPicker()"><div class="icon">📝</div><div class="label">模拟考试</div><div class="count">限时训练</div><div class="detail">${(()=>{let t=0;for(const k of ['科目一','科目二','综合']){const s=indexData[k]?.['模拟卷']?.['_小计'];if(s)t+=s['总题数']}return t})()} 题 · 多套可选</div></div>
     </div>
-    <div class="stats-panel">
+    <div class="stats-panel" style="cursor:pointer" onclick="navigate('#note')">
+      <div class="s-title">📖 考点笔记 <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px;">考试大纲 & 重点知识汇总</span></div>
       <div class="s-title">📊 学习统计</div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="stats-row"><span>当前用户: <span class="num">${currentUser?.username||''}</span></span><span>已做题数: <span class="num">${answeredCount}</span> / ${totalAll}</span><span>总正确率: <span class="num">${answeredCount?Math.round(correctCount/answeredCount*100):0}%</span></span><span>待复习: <span class="num" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc}</span></span><span style="margin-left:auto;cursor:pointer;color:var(--muted)" onclick="showSettings()">⚙️ 设置</span>${currentUser?.role === 'admin' ? `<span style="cursor:pointer;color:var(--gold)" onclick="navigate('#admin')">📊 后台统计</span>` : ''}<span style="cursor:pointer;color:var(--muted)" onclick="logout()">退出</span></div>
@@ -979,6 +982,46 @@ function renderChangelog() {
     <div style="text-align:center;padding:2px 20px 24px;font-size:11px;color:var(--muted);opacity:.5;">Made by Sisyphus 🏹</div>
   `;
   document.title = '版本记录 · Agent Exam Training';
+  v.classList.add('active');
+}
+
+// ── Note Viewer ──
+function renderNote(source) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById('view-note');
+  
+  if (!source) {
+    // Show note list
+    const notes = indexData?.['综合']?.['考点笔记'] || {};
+    let html = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">📖 考点笔记</div><div class="page-sub">考试大纲 & 重点知识</div></div><div class="set-grid">';
+    for (const [name, info] of Object.entries(notes)) {
+      if (name.startsWith('_')) continue;
+      html += `<div class="set-card" onclick="navigate('#note/${encodeURIComponent(name)}')"><div class="s-title">📖 ${name}</div><div class="s-count">考点笔记</div></div>`;
+    }
+    html += '</div>';
+    v.innerHTML = html;
+  } else {
+    // Load and display a specific note
+    const notes = indexData?.['综合']?.['考点笔记'] || {};
+    const info = notes[source];
+    if (!info) { v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">笔记未找到</div></div>'; v.classList.add('active'); return; }
+    
+    fetch(`./data/${info['文件']}`, {cache:'no-store'}).then(r=>r.json()).then(data => {
+      v.innerHTML = `
+        <div class="page-header"><button class="back-btn" onclick="navigate('#note')">← 笔记列表</button><div class="page-title">📖 ${source}</div><div class="page-sub"><a href="${data.url||'#'}" target="_blank" style="color:var(--muted)">原网页 ↗</a></div></div>
+        <div style="max-width:800px;margin:0 auto;padding:20px 24px;">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;font-size:14px;line-height:1.9;color:var(--white);">
+            ${data.text ? data.text.replace(/\n/g,'<br>') : '<div style="color:var(--muted)">加载中...</div>'}
+          </div>
+        </div>
+      `;
+      document.title = `${source} · Agent Exam Training`;
+    }).catch(() => {
+      v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">加载失败</div></div>';
+    });
+  }
+  
+  document.title = source ? `${source} · Agent Exam Training` : '考点笔记 · Agent Exam Training';
   v.classList.add('active');
 }
 
