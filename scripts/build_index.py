@@ -64,8 +64,8 @@ SOURCE_NAMES = {
     "ycjjr-policy-merged": "政策法规与经纪实务模拟题合集",
     "ycjjr-stage-merged": "舞台艺术基础知识模拟题合集",
     "ycjjr-108348": "舞台艺术基础知识考试练习题",
-    "note-108322": "舞台艺术基础知识考试重要考点",
-    "note-108323": "舞台艺术基础知识考试大纲",
+    "note-108322": "重要考点篇",
+    "note-108323": "大纲篇",
 }
 
 # 找到所有 json 文件 (排除 index.json, all_questions.json)
