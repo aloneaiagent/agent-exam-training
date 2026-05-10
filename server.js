@@ -189,12 +189,15 @@ function safeStaticPath(urlPath) {
 
 function userSummary(username, progress) {
   const records = progress.records || {};
-  const answered = Object.keys(records).length;
-  const single = calcRate(records, q => q.type === '单选题');
-  const multi = calcRate(records, q => q.type === '多选题');
-  const judge = calcRate(records, q => q.type === '判断题');
-  const s1 = calcRate(records, q => q.subject === '科目一');
-  const s2 = calcRate(records, q => q.subject === '科目二');
+  const meta = loadQuestionMeta();
+  // Only count records for questions that still exist
+  const validRecords = Object.fromEntries(Object.entries(records).filter(([qid]) => meta[qid]));
+  const answered = Object.keys(validRecords).length;
+  const single = calcRate(validRecords, q => q.type === '单选题');
+  const multi = calcRate(validRecords, q => q.type === '多选题');
+  const judge = calcRate(validRecords, q => q.type === '判断题');
+  const s1 = calcRate(validRecords, q => q.subject === '科目一');
+  const s2 = calcRate(validRecords, q => q.subject === '科目二');
   return {
     username,
     lastLogin: (progress.stats && progress.stats.lastLogin) || null,

@@ -306,7 +306,16 @@ function setRecord(qid,correct,answer) {
   saveProgress(p);
 }
 function markMastered(qid) { const p=loadProgress(); p.wrong=p.wrong.filter(w=>w!==qid); saveProgress(p); }
-function getStats() { const p=loadProgress(); return {...p.stats, wrong:p.wrong.length}; }
+function getStats() { const p=loadProgress(); const meta=allQuestionMeta||{};
+  // Filter stale records and wrong qids
+  if (meta && Object.keys(meta).length > 0) {
+    const validIds = new Set(Object.keys(meta));
+    let changed = false;
+    for (const qid of Object.keys(p.records)) { if (!validIds.has(qid)) { delete p.records[qid]; changed = true; } }
+    p.wrong = p.wrong.filter(w => validIds.has(w));
+    if (changed) saveProgress(p);
+  }
+  return {...p.stats, wrong: p.wrong.length}; }
 function clearWrong(qids) { const p=loadProgress(); p.wrong=qids?p.wrong.filter(w=>!qids.includes(w)):[]; saveProgress(p); }
 
 // ── Auth ──
@@ -490,7 +499,10 @@ function handleKeydown(e) {
 // ── Home ──
 async function renderHome() {
   const v=document.getElementById('view-home'); await loadIndex(); await loadAllQuestionMeta();
-  const stats=getStats(); const records=loadProgress().records||{}; let totalAll=0;
+  const stats=getStats(); const rawRecords=loadProgress().records||{};
+  // Filter out stale records (questions that no longer exist after dedup)
+  const records=allQuestionMeta ? Object.fromEntries(Object.entries(rawRecords).filter(([qid])=>allQuestionMeta[qid])) : rawRecords;
+  let totalAll=0;
   for(const km of ['科目一','科目二','综合']) for(const qt of ['主题库','模拟卷']) { const sub=indexData[km]?.[qt]?.['_小计']; if(sub) totalAll+=sub['总题数']; }
   const answeredCount = Object.keys(records).length;
   const correctCount = Object.values(records).filter(r=>r?.correct).length;
