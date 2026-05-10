@@ -621,9 +621,9 @@ function renderCurrentQuestion() {
       <div class="quiz-options" id="optionsContainer">${oh}</div>
       ${fb}
       <div class="quiz-actions">
-        ${!quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>${isMulti?'提交答案':'提交答案'}</button>`:''}
-        ${quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>${isMulti?'提交':'提交'}</button>`:''}
-        ${quizState.isExam&&!quizState.answered?'':`<button class="btn btn-secondary" id="btnNext" onclick="nextQuestion()" style="display:${quizState.answered&&!quizState.isExam?'inline-block':'none'}">下一题 →</button>`}
+        ${!quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>提交答案</button>`:''}
+        ${quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>提交</button>`:''}
+        ${!quizState.isExam?`<button class="btn btn-secondary" id="btnNext" onclick="nextQuestion()" ${idx>=total-1?'disabled':''}>下一题 →</button>`:''}">下一题 →</button>`}
         ${!quizState.isExam?`<button class="btn btn-secondary" onclick="previousQuestion()" ${idx===0?'disabled':''}>← 上一题</button>`:''}
         ${!quizState.isExam?`<button class="btn btn-secondary" onclick="toggleSheet()">📋 答题卡</button>`:''}
         ${quizState.isExam && quizState.answered && idx < total-1 ? `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>` : ''}
