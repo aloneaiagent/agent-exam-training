@@ -515,8 +515,8 @@ async function renderHome() {
       <div class="dash-card" onclick="navigate('#review')"><div class="icon">📕</div><div class="label">错题本</div><div class="count">${wc} 题待复习</div><div class="detail" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc>0?'⚠ 需要巩固':'✅ 暂无错题'}</div></div>
       <div class="dash-card" onclick="showExamPicker()"><div class="icon">📝</div><div class="label">模拟考试</div><div class="count">限时训练</div><div class="detail">${(()=>{let t=0;for(const k of ['科目一','科目二','综合']){const s=indexData[k]?.['模拟卷']?.['_小计'];if(s)t+=s['总题数']}return t})()} 题 · 多套可选</div></div>
     </div>
-    <div class="stats-panel" style="cursor:pointer" onclick="navigate('#note')">
-      <div class="s-title">📖 考点笔记 <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px;">考试大纲 & 重点知识汇总</span></div>
+    <div class="stats-panel">
+      <div class="s-title" style="cursor:pointer" onclick="navigate('#note')">📖 考点笔记 <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px;">考试大纲 & 重点知识汇总</span></div>
       <div class="s-title">📊 学习统计</div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="stats-row"><span>当前用户: <span class="num">${currentUser?.username||''}</span></span><span>已做题数: <span class="num">${answeredCount}</span> / ${totalAll}</span><span>总正确率: <span class="num">${answeredCount?Math.round(correctCount/answeredCount*100):0}%</span></span><span>待复习: <span class="num" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc}</span></span><span style="margin-left:auto;cursor:pointer;color:var(--muted)" onclick="showSettings()">⚙️ 设置</span>${currentUser?.role === 'admin' ? `<span style="cursor:pointer;color:var(--gold)" onclick="navigate('#admin')">📊 后台统计</span>` : ''}<span style="cursor:pointer;color:var(--muted)" onclick="logout()">退出</span></div>
