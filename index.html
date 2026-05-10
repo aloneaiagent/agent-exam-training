@@ -207,6 +207,20 @@ a { color:var(--gold); text-decoration:none; }
 .shortcut-hint { font-size:11px; color:var(--muted); background:var(--bg-card); border:1px solid var(--border); padding:6px 12px; border-radius:6px; opacity:.5; margin-top:12px; text-align:center; }
 .shortcut-hint kbd { display:inline-block; background:var(--bg-panel); padding:1px 6px; border-radius:3px; font-size:10px; margin:0 2px; }
 
+/* 版本日志 */
+.changelog { width:100%; max-width:960px; margin:0 auto 40px; padding:0 20px; }
+.cl-title { font-size:15px; color:var(--gold); font-weight:600; margin-bottom:16px; text-align:center; }
+.cl-item { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:8px; transition:all .2s; }
+.cl-item:hover { border-color:var(--border-h); }
+.cl-ver { display:inline-block; background:var(--gold); color:var(--bg-deep); font-weight:700; font-size:11px; padding:1px 8px; border-radius:4px; margin-right:8px; }
+.cl-date { font-size:11px; color:var(--muted); margin-left:6px; }
+.cl-desc { font-size:13px; color:var(--white); margin-top:6px; line-height:1.6; }
+.cl-desc span { color:var(--teal); }
+.cl-desc .tag { display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px; margin-right:4px; }
+.cl-desc .tag-add { background:var(--green-dim); color:var(--green); }
+.cl-desc .tag-fix { background:rgba(232,93,93,.12); color:var(--red); }
+.cl-desc .tag-ref { background:var(--teal-dim); color:var(--teal); }
+
 /* 响应式 */
 @media (max-width:900px) { .dashboard-grid { grid-template-columns:1fr 1fr; max-width:680px; } }
 @media (max-width:640px) {
@@ -480,7 +494,7 @@ async function renderHome() {
   const s2Rate=calcRate(records, m=>m.subject==='科目二');
   
   v.innerHTML=`
-    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div><div class="en" style="margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:2px;">题库演练系统 V3</div></div>
+    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div><div class="en" style="margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:2px;">题库演练系统 V4</div></div></div>
     <div class="dashboard-grid">
       <div class="dash-card" onclick="navigate('#s1')"><div class="icon">📘</div><div class="label">科目一</div><div class="count">思想政治与法律基础</div><div class="detail">${indexData['科目一']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
       <div class="dash-card" onclick="navigate('#s2')"><div class="icon">📙</div><div class="label">科目二</div><div class="count">演出市场政策与经纪实务</div><div class="detail">${indexData['科目二']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
@@ -499,6 +513,13 @@ async function renderHome() {
         ${formatRateBox('科目一正确率', s1Rate)}
         ${formatRateBox('科目二正确率', s2Rate)}
       </div>
+    </div>
+    <div class="changelog">
+      <div class="cl-title">📜 版本更新记录</div>
+      <div class="cl-item"><span class="cl-ver">V4</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 题型独立分组（100单选/30多选/30判断一组） <span class="tag tag-add">新增</span> 模拟卷合并为3套 <span class="tag tag-ref">改版</span> 去掉题型标题行,数量标在科目头部 <span class="tag tag-add">新增</span> 答题卡新增判断题分区 <span class="tag tag-ref">改版</span> 解析从题干独立到选项下方 <span class="tag tag-fix">修复</span> 判断题UI显示（✓/✗） <span class="tag tag-fix">修复</span> multiStrict判分开关生效 <span class="tag tag-fix">修复</span> 重置数据按钮对登录用户无效</div></div>
+      <div class="cl-item"><span class="cl-ver">V3</span><span class="cl-date">2026-05-09</span><div class="cl-desc"><span class="tag tag-fix">修复</span> 错题本点击跳错题循环不返回完整题库 <span class="tag tag-fix">修复</span> 索引同步2139→2091 <span class="tag tag-fix">修复</span> 50道单选题→判断题重分类 <span class="tag tag-fix">修复</span> 括号加空格 <span class="tag tag-add">新增</span> 未答题目显示上下题按钮 <span class="tag tag-add">新增</span> 题型统计增加判断题显示</div></div>
+      <div class="cl-item"><span class="cl-ver">V2</span><span class="cl-date">2026-05-08</span><div class="cl-desc"><span class="tag tag-add">新增</span> 键盘快捷键 <span class="tag tag-add">新增</span> 后台统计面板 <span class="tag tag-add">新增</span> 导入6套ycjjr模拟卷 <span class="tag tag-add">新增</span> 自动下一题设置 <span class="tag tag-ref">改版</span> 快捷键提示移到按钮下方 <span class="tag tag-ref">改版</span> 后台入口加入学习统计栏</div></div>
+      <div class="cl-item"><span class="cl-ver">V1</span><span class="cl-date">初版</span><div class="cl-desc">演出经纪人题库系统上线 · 支持科目一/二主题库 · 模拟考试 · 错题本 · 多用户登录 · PostgreSQL云存储</div></div>
     </div>
   `;
   document.title = 'Agent Exam Training · 演出经纪人题库';
