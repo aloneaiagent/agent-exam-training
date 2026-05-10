@@ -236,7 +236,6 @@ function userSummary(username, progress) {
     if (maxStreak >= 20) achievements.push('streak_20');
     if ((progress.wrong || []).length === 0 && total >= 10) achievements.push('wrong_zero');
   }
-  if (wrongCount === 0 && answeredCount >= 10) achievements.push('wrong_zero');
   
   return {
     username,
