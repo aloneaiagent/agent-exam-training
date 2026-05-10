@@ -41,6 +41,7 @@ async function initDb() {
       records JSONB DEFAULT '{}',
       wrong JSONB DEFAULT '[]',
       stats JSONB DEFAULT '{"total":0,"correct":0}',
+      game JSONB DEFAULT '{}',
       generated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
@@ -70,7 +71,7 @@ async function readDb() {
     }
   }
   // PostgreSQL
-  const result = await pgPool.query('SELECT username, records, wrong, stats FROM progress');
+  const result = await pgPool.query('SELECT username, records, wrong, stats, game FROM progress');
   const users = {};
   for (const username of Object.keys(USERS)) users[username] = defaultProgress();
   for (const row of result.rows) {
@@ -78,6 +79,7 @@ async function readDb() {
       records: row.records || {},
       wrong: row.wrong || [],
       stats: row.stats || { total: 0, correct: 0 },
+      game: row.game || {},
     };
   }
   return { users };
@@ -93,8 +95,8 @@ async function writeDb(db) {
   }
   for (const [username, progress] of Object.entries(db.users || {})) {
     await pgPool.query(
-      `UPDATE progress SET records = $1, wrong = $2, stats = $3, generated_at = NOW() WHERE username = $4`,
-      [progress.records || {}, JSON.stringify(progress.wrong || []), progress.stats || { total: 0, correct: 0 }, username]
+      `UPDATE progress SET records = $1, wrong = $2, stats = $3, game = $5, generated_at = NOW() WHERE username = $4`,
+      [progress.records || {}, JSON.stringify(progress.wrong || []), progress.stats || { total: 0, correct: 0 }, username, JSON.stringify(progress.game || {})]
     );
   }
 }
