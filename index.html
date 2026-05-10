@@ -530,36 +530,43 @@ async function showExamPicker() {
 async function renderSubject(subject) {
   const v=document.getElementById('view-subject'); await loadIndex();
   const subInfo = { '科目一':{name:'思想政治与法律基础',icon:'📘'}, '科目二':{name:'演出市场政策与经纪实务',icon:'📙'}, '综合':{name:'综合',icon:'📚'} }[subject]||{name:subject,icon:'📚'};
-  let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}</div></div><div class="set-grid">`;
   
   if (subject === '综合') {
-    // Mock exams: keep original card per source
+    let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}</div></div><div class="set-grid">`;
     const sources=getAllSources(subject);
-    let lastType='';
     for(const src of sources) {
-      if(src.type!==lastType) { html+=`<div class="set-card section-header">📝 模拟试卷</div>`; lastType=src.type; }
       const sq=await loadQuestions(src.file);
       const sn=formatSourceName(src.name, subject);
       html+=`<div class="set-card" onclick="navigate('#exam/${encodeURIComponent(src.name)}')"><div class="s-title">${sn}</div><div class="s-count">${src.total} 题 · ${sq.filter(q=>q.题型==='单选题').length}单选 ${sq.filter(q=>q.题型==='多选题').length}多选${(()=>{const jc=sq.filter(q=>q.题型==='判断题').length;return jc?` ${jc}判断`:''})()}</div><div class="s-progress">限时 50 分钟 · 顺序答题</div></div>`;
     }
+    html+='</div>';
+    v.innerHTML=html;
   } else {
     // 科目一/科目二: group by type with batch sizes
     const BATCH = { '单选题':100, '多选题':30, '判断题':30 };
     const TYPE_ICON = { '单选题':'🔵', '多选题':'📌', '判断题':'🔘' };
     const progress=loadProgress();
     
+    // Pre-load all questions for this subject once
+    const allQuestions = [];
+    const sources=getAllSources(subject);
+    for(const src of sources) {
+      const sq=await loadQuestions(src.file);
+      allQuestions.push(...sq);
+    }
+    
+    // Group by type and build header summary
+    let byType = {};
     for(const type of ['单选题','多选题','判断题']) {
-      // Collect all questions of this type from all sources in this subject
-      let allQs=[];
-      const sources=getAllSources(subject);
-      for(const src of sources) {
-        const sq=await loadQuestions(src.file);
-        allQs.push(...sq.filter(q=>q.题型===type));
-      }
+      byType[type] = allQuestions.filter(q=>q.题型===type);
+    }
+    let typeSummary = Object.entries(byType).filter(([,qs])=>qs.length).map(([t,qs])=>` ${TYPE_ICON[t]}${qs.length}`).join('');
+    
+    let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}${typeSummary}</div></div><div class="set-grid">`;
+    
+    for(const type of ['单选题','多选题','判断题']) {
+      const allQs = byType[type];
       if(!allQs.length) continue;
-      
-      html+=`<div class="set-card section-header">${TYPE_ICON[type]} ${type}（共 ${allQs.length} 题）</div>`;
-      
       const batchSize = BATCH[type];
       const numBatches = Math.ceil(allQs.length / batchSize);
       for(let b=0; b<numBatches; b++) {
@@ -572,10 +579,11 @@ async function renderSubject(subject) {
         html+=`<div class="set-card" onclick="navigate('#batch/${subject}/${type}/${b}')"><div class="s-title">${TYPE_ICON[type]} ${type}${batchLabel}</div><div class="s-count">${batchQs.length} 题（${start+1}-${end}）</div><div class="s-progress">已完成 ${doneCount}/${batchQs.length}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
       }
     }
+    html+='</div>';
+    v.innerHTML=html;
   }
   
-  html+='</div>';
-  v.innerHTML=html; document.title=`${subject} · 演出经纪人`;
+  document.title=`${subject} · 演出经纪人`;
   document.getElementById('view-subject').classList.add('active');
 }
 
