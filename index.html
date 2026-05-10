@@ -247,6 +247,7 @@ a { color:var(--gold); text-decoration:none; }
 <div id="view-exam" class="view"></div>
 <div id="view-review" class="view"></div>
 <div id="view-admin" class="view"></div>
+<div id="view-changelog" class="view"></div>
 
 <div class="answer-sheet-overlay" id="sheetOverlay"></div>
 <div class="answer-sheet" id="answerSheet"></div>
@@ -452,6 +453,7 @@ function navigate(hash) {
     case 'exam': renderExam(parts[1]); break;
     case 'review': renderReview(); break;
     case 'admin': renderAdmin(); break;
+    case 'changelog': renderChangelog(); break;
     case 'wrong': renderWrongQuiz(parts[1]||null); break;
     case 'batch': renderBatch(parts[1], parts[2], parseInt(parts[3])||0); break;
     default: renderHome();
@@ -514,13 +516,7 @@ async function renderHome() {
         ${formatRateBox('科目二正确率', s2Rate)}
       </div>
     </div>
-    <div class="changelog">
-      <div class="cl-title">📜 版本更新记录</div>
-      <div class="cl-item"><span class="cl-ver">V4</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 题型独立分组（100单选/30多选/30判断一组） <span class="tag tag-add">新增</span> 模拟卷合并为3套 <span class="tag tag-ref">改版</span> 去掉题型标题行,数量标在科目头部 <span class="tag tag-add">新增</span> 答题卡新增判断题分区 <span class="tag tag-ref">改版</span> 解析从题干独立到选项下方 <span class="tag tag-fix">修复</span> 判断题UI显示（✓/✗） <span class="tag tag-fix">修复</span> multiStrict判分开关生效 <span class="tag tag-fix">修复</span> 重置数据按钮对登录用户无效</div></div>
-      <div class="cl-item"><span class="cl-ver">V3</span><span class="cl-date">2026-05-09</span><div class="cl-desc"><span class="tag tag-fix">修复</span> 错题本点击跳错题循环不返回完整题库 <span class="tag tag-fix">修复</span> 索引同步2139→2091 <span class="tag tag-fix">修复</span> 50道单选题→判断题重分类 <span class="tag tag-fix">修复</span> 括号加空格 <span class="tag tag-add">新增</span> 未答题目显示上下题按钮 <span class="tag tag-add">新增</span> 题型统计增加判断题显示</div></div>
-      <div class="cl-item"><span class="cl-ver">V2</span><span class="cl-date">2026-05-08</span><div class="cl-desc"><span class="tag tag-add">新增</span> 键盘快捷键 <span class="tag tag-add">新增</span> 后台统计面板 <span class="tag tag-add">新增</span> 导入6套ycjjr模拟卷 <span class="tag tag-add">新增</span> 自动下一题设置 <span class="tag tag-ref">改版</span> 快捷键提示移到按钮下方 <span class="tag tag-ref">改版</span> 后台入口加入学习统计栏</div></div>
-      <div class="cl-item"><span class="cl-ver">V1</span><span class="cl-date">初版</span><div class="cl-desc">演出经纪人题库系统上线 · 支持科目一/二主题库 · 模拟考试 · 错题本 · 多用户登录 · PostgreSQL云存储</div></div>
-    </div>
+    <div style="margin-top:8px;text-align:center;"><span style="font-size:11px;color:var(--muted);cursor:pointer" onclick="navigate('#changelog')">题库演练系统 V4 · 📜 版本记录</span></div>
   `;
   document.title = 'Agent Exam Training · 演出经纪人题库';
   document.getElementById('view-home').classList.add('active');
@@ -966,6 +962,23 @@ async function renderReview() {
   v.classList.add('active');
 }
 
+
+// ── Changelog ──
+function renderChangelog() {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById('view-changelog');
+  v.innerHTML=`
+    <div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📜 版本更新记录</div><div class="page-sub">题库演练系统 V4</div></div>
+    <div style="max-width:700px;margin:0 auto;padding:20px 24px;">
+      <div class="cl-item"><span class="cl-ver">V4</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 题型独立分组（100单选/30多选/30判断一组） <span class="tag tag-add">新增</span> 模拟卷合并为3套 <span class="tag tag-ref">改版</span> 去掉题型标题行，数量标在科目头部 <span class="tag tag-add">新增</span> 答题卡新增判断题分区 <span class="tag tag-ref">改版</span> 解析从题干独立到选项下方 <span class="tag tag-fix">修复</span> 判断题UI显示（✓/✗） <span class="tag tag-fix">修复</span> multiStrict判分开关生效 <span class="tag tag-fix">修复</span> 重置数据按钮对登录用户无效</div></div>
+      <div class="cl-item"><span class="cl-ver">V3</span><span class="cl-date">2026-05-09</span><div class="cl-desc"><span class="tag tag-fix">修复</span> 错题本点击跳错题循环不返回完整题库 <span class="tag tag-fix">修复</span> 索引同步2139→2091 <span class="tag tag-fix">修复</span> 50道单选题→判断题重分类 <span class="tag tag-fix">修复</span> 括号加空格 <span class="tag tag-add">新增</span> 未答题目显示上下题按钮 <span class="tag tag-add">新增</span> 题型统计增加判断题显示</div></div>
+      <div class="cl-item"><span class="cl-ver">V2</span><span class="cl-date">2026-05-08</span><div class="cl-desc"><span class="tag tag-add">新增</span> 键盘快捷键 <span class="tag tag-add">新增</span> 后台统计面板 <span class="tag tag-add">新增</span> 导入6套ycjjr模拟卷 <span class="tag tag-add">新增</span> 自动下一题设置 <span class="tag tag-ref">改版</span> 快捷键提示移到按钮下方 <span class="tag tag-ref">改版</span> 后台入口加入学习统计栏</div></div>
+      <div class="cl-item"><span class="cl-ver">V1</span><span class="cl-date">初版</span><div class="cl-desc">演出经纪人题库系统上线 · 支持科目一/二主题库 · 模拟考试 · 错题本 · 多用户登录 · PostgreSQL云存储</div></div>
+    </div>
+  `;
+  document.title = '版本记录 · Agent Exam Training';
+  v.classList.add('active');
+}
 
 // ── Admin ──
 async function renderAdmin() {
