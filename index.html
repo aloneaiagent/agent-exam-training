@@ -1007,11 +1007,37 @@ function renderNote(source) {
     if (!info) { v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">笔记未找到</div></div>'; v.classList.add('active'); return; }
     
     fetch(`./data/${info['文件']}`, {cache:'no-store'}).then(r=>r.json()).then(data => {
+      if (!data.text) { v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">内容为空</div></div>'; v.classList.add('active'); return; }
+      
+      // Highlight keywords in red
+      const highlight = (text) => {
+        return text.replace(/(必考|超级[^。]*重点|常考|重点|题库|重要|全部记住)/g, '<span style="color:var(--red);font-weight:600">$1</span>');
+      };
+      
+      const lines = data.text.split('\n');
+      let noteHtml = '';
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) { noteHtml += '<div style="height:8px"></div>'; continue; }
+        
+        // Detect headers (short lines ending with ：or lines starting with 第/一、/二、/第一部分 etc.)
+        const isSectionHeader = /^[一二三四五六七八九十]+[、.．]/.test(trimmed) || /^第[一二三四五六七八九十]/.test(trimmed) || /^[A-Z]．/.test(trimmed) || /^[A-Z]、/.test(trimmed) || /^[（(].*[）)]/.test(trimmed);
+        const isSubHeader = /^\d+[.、．]/.test(trimmed) || /^[\d]+）/.test(trimmed);
+        
+        if (isSectionHeader) {
+          noteHtml += `<div style="color:var(--gold);font-weight:700;font-size:15px;margin-top:18px;margin-bottom:4px;">${highlight(trimmed)}</div>`;
+        } else if (isSubHeader) {
+          noteHtml += `<div style="color:var(--teal);font-weight:600;margin-top:10px;margin-bottom:2px;">${highlight(trimmed)}</div>`;
+        } else {
+          noteHtml += `<div style="margin:1px 0;word-break:break-word;">${highlight(trimmed)}</div>`;
+        }
+      }
+      
       v.innerHTML = `
         <div class="page-header"><button class="back-btn" onclick="navigate('#note')">← 笔记列表</button><div class="page-title">📖 ${source}</div><div class="page-sub"><a href="${data.url||'#'}" target="_blank" style="color:var(--muted)">原网页 ↗</a></div></div>
         <div style="max-width:800px;margin:0 auto;padding:20px 24px;">
-          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;font-size:14px;line-height:1.9;color:var(--white);">
-            ${data.text ? data.text.replace(/\n/g,'<br>') : '<div style="color:var(--muted)">加载中...</div>'}
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px 28px;font-size:14px;line-height:1.7;color:var(--white);white-space:pre-wrap;">
+            ${noteHtml}
           </div>
         </div>
       `;
