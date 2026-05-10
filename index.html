@@ -389,35 +389,6 @@ function getGameState() {
   if (!p.game) p.game = { xp:0, unlocked:{}, streak:0, maxStreak:0, answeredIds:[] };
   if (!p.game.unlocked) p.game.unlocked = {};
   if (!p.game.answeredIds) p.game.answeredIds = [];
-  
-  // Retroactively calculate XP from records
-  const records = p.records || {};
-  const answeredIds = p.game.answeredIds || [];
-  const answeredSet = new Set(answeredIds);
-  const recordCount = Object.keys(records).length;
-  
-  if (recordCount > answeredSet.size) {
-    // Recalculate from all records
-    const sorted = Object.entries(records).sort((a,b) => (a[1].time||0) - (b[1].time||0));
-    let xp = 0, streak = 0, maxStreak = 0;
-    const newAnswered = [];
-    const seen = new Set();
-    for (const [qid, rec] of sorted) {
-      if (seen.has(qid)) continue;
-      seen.add(qid);
-      newAnswered.push(qid);
-      xp += rec.correct ? 10 : 2;
-      if (rec.correct) { streak++; if (streak > maxStreak) maxStreak = streak; }
-      else streak = 0;
-    }
-    p.game.xp = xp;
-    p.game.answeredIds = newAnswered;
-    p.game.streak = streak;
-    p.game.maxStreak = maxStreak;
-    saveGameState(p.game);
-    // Check achievements after recalc (guard against recursion)
-    if (!window.__gameRecalc) { window.__gameRecalc = true; setTimeout(()=>{ window.__gameRecalc=false; checkAchievements(); }, 100); }
-  }
   return p.game;
 }
 function saveGameState(g) {
