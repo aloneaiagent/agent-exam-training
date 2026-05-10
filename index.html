@@ -474,7 +474,7 @@ async function renderHome() {
   const s2Rate=calcRate(records, m=>m.subject==='科目二');
   
   v.innerHTML=`
-    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div><div class="en" style="margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:2px;">题库演练系统 V2</div></div>
+    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div><div class="en" style="margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:2px;">题库演练系统 V3</div></div>
     <div class="dashboard-grid">
       <div class="dash-card" onclick="navigate('#s1')"><div class="icon">📘</div><div class="label">科目一</div><div class="count">思想政治与法律基础</div><div class="detail">${indexData['科目一']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
       <div class="dash-card" onclick="navigate('#s2')"><div class="icon">📙</div><div class="label">科目二</div><div class="count">演出市场政策与经纪实务</div><div class="detail">${indexData['科目二']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
