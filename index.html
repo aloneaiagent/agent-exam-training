@@ -99,8 +99,7 @@ a { color:var(--gold); text-decoration:none; }
 .set-card .s-progress { font-size:12px; color:var(--teal); margin-top:6px; }
 .set-card .s-bar { margin-top:8px; height:4px; background:var(--bg-panel); border-radius:2px; overflow:hidden; }
 .set-card .s-fill { height:100%; background:var(--gold-dim); border-radius:2px; }
-.set-card.section-header { cursor:default; background:transparent; border:none; padding:4px 20px 2px; min-height:auto; display:block; font-size:14px; color:var(--muted); grid-column:1/-1; }
-.set-card.section-header:hover { transform:none; box-shadow:none; }
+
 
 /* 刷题页 */
 #view-quiz, #view-exam { padding:0; }
@@ -432,9 +431,6 @@ function getQuestionArticleId(q) {
 
 function formatSourceName(source, subject='') {
   if(!source) return '';
-  const mockOrder = ['模拟试题（常考点）','模拟试题（常考点2）','模拟题'];
-  const mockIdx = mockOrder.indexOf(source);
-  if(mockIdx >= 0) return `模拟卷 ${String(mockIdx+1).padStart(2,'0')}`;
   const km = subject || (source.includes('思想政治') ? '科目一' : (source.includes('演出市场') ? '科目二' : ''));
   if(indexData && (km==='科目一' || km==='科目二')) {
     const arr = getAllSources(km).filter(s=>s.type==='主题库');
