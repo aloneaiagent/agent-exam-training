@@ -1026,7 +1026,7 @@ function renderNote(source) {
         pages = pageBreaks;
       } else {
         // Fallback: split by section headers
-        var sectionHeaders = /^(第[一二三四五六七八九十]+[部分章节篇])/;
+        var sectionHeaders = /^(第[一二三四五六七八九十]+[部分章])/;
         var lines = rawText.split('\n').filter(function(l) { return l.trim(); });
         var cur = [];
         for (var i = 0; i < lines.length; i++) {
