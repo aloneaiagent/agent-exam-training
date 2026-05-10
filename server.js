@@ -202,6 +202,9 @@ function userSummary(username, progress) {
     username,
     lastLogin: (progress.stats && progress.stats.lastLogin) || null,
     answered,
+    xp: Object.values(validRecords).reduce((sum, rec) => sum + (rec.correct ? 10 : 2), 0),
+    achievements: (progress.game && progress.game.unlocked) ? Object.keys(progress.game.unlocked) : [],
+    gameXp: (progress.game && progress.game.xp) || 0,
     singleAccuracy: single.accuracy, singleDone: single.total,
     multiAccuracy: multi.accuracy, multiDone: multi.total,
     judgeAccuracy: judge.accuracy, judgeDone: judge.total,
@@ -251,7 +254,7 @@ async function handleApi(req, res) {
     }
 
     if (req.method === 'GET' && req.url === '/api/version') {
-      return sendJson(res, 200, { version: '5.0.0', totalQuestions: 2091, subjects: { '科目一': 885, '科目二': 781, '综合': 425 } });
+      return sendJson(res, 200, { version: '6.0.0', totalQuestions: 2091, subjects: { '科目一': 885, '科目二': 781, '综合': 425 } });
     }
 
     if (req.method === 'GET' && req.url === '/api/admin/stats') {

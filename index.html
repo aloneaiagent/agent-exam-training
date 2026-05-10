@@ -136,6 +136,7 @@ a { color:var(--gold); text-decoration:none; }
 .btn-primary { background:var(--gold); color:var(--bg-deep); border-color:var(--gold); font-weight:600; }
 .btn-primary:hover { background:#d4a83a; }
 .btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+.btn-secondary:disabled { opacity:.35; cursor:not-allowed; filter:grayscale(.6); }
 .btn-secondary { background:transparent; color:var(--white); border-color:var(--border); }
 .btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
 .btn-danger { background:transparent; color:var(--red); border-color:rgba(232,93,93,.3); }
@@ -517,7 +518,7 @@ function navigate(hash) {
     case 'changelog': renderChangelog(); break;
     case 'wrong': renderWrongQuiz(parts[1]||null); break;
     case 'batch': renderBatch(parts[1], parts[2], parseInt(parts[3])||0); break;
-    case 'ach': goToAchievements(); break;
+    case 'ach': goAch(); break;
     case 'note': renderNote(parts[1]||null); break;
     default: renderHome();
   }
@@ -562,7 +563,9 @@ async function renderHome() {
   const s2Rate=calcRate(records, m=>m.subject==='科目二');
   
   v.innerHTML=`
-    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div><div class="en" style="margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:2px;">题库演练系统 V5</div></div></div>
+    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">🏆 Lv.${(()=>{try{const _g=getGameState();const _l=calcLevel(_g.xp);return _l.lv+' '+_l.title+' ⚡'+_g.xp+'XP';}catch(e){return'?'}})()}</div>
+    </div>
     <div class="dashboard-grid">
       <div class="dash-card" onclick="navigate('#s1')"><div class="icon">📘</div><div class="label">科目一</div><div class="count">思想政治与法律基础</div><div class="detail">${indexData['科目一']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
       <div class="dash-card" onclick="navigate('#s2')"><div class="icon">📙</div><div class="label">科目二</div><div class="count">演出市场政策与经纪实务</div><div class="detail">${indexData['科目二']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
@@ -583,7 +586,7 @@ async function renderHome() {
         ${formatRateBox('科目二正确率', s2Rate)}
       </div>
     </div>
-    <div style="margin-top:8px;text-align:center;"><span style="font-size:11px;color:var(--muted);cursor:pointer" onclick="navigate('#changelog')">题库演练系统 V5 · 📜 版本记录</span><br>🏆 Lv.${(()=>{try{const _g=getGameState();const _l=calcLevel(_g.xp);return _l.lv+' '+_l.title+' ⚡'+_g.xp+'XP';}catch(e){return'?'}})()} · <span style="font-size:10px;color:var(--muted);opacity:.5">Made by Sisyphus 🏹</span></div>
+    <div style="margin-top:8px;text-align:center;"><span style="font-size:11px;color:var(--muted);cursor:pointer" onclick="navigate('#changelog')">题库演练系统 V6 · 版本记录</span><br><span style="font-size:10px;color:var(--muted);opacity:.5">Made by Sisyphus 🏹</span></div>
   `;
   document.title = 'Agent Exam Training · 演出经纪人题库';
   document.getElementById('view-home').classList.add('active');
@@ -1036,8 +1039,9 @@ function renderChangelog() {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const v=document.getElementById('view-changelog');
   v.innerHTML=`
-    <div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📜 版本更新记录</div><div class="page-sub">题库演练系统 V5</div></div>
+    <div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📜 版本更新记录</div><div class="page-sub">题库演练系统 V6</div></div>
     <div style="max-width:700px;margin:0 auto;padding:20px 24px;">
+      <div class="cl-item"><span class="cl-ver">V6</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 🏆游戏化成就系统（XP等级+21项成就+弹窗） <span class="tag tag-add">新增</span> 回溯计算历史记录XP <span class="tag tag-add">新增</span> 称号一览弹窗（👑查看全部15级称号） <span class="tag tag-add">新增</span> 成长/对局/专精/社交分类标签 <span class="tag tag-add">新增</span> 后台统计增加XP和成就图标列 <span class="tag tag-ref">改版</span> XP进度条视觉化（含等级两端标注） <span class="tag tag-ref">改版</span> 成就系统独立为模块文件 <span class="tag tag-ref">改版</span> 等级XP移至首页标题下方 <span class="tag tag-fix">修复</span> 成就页空白（路由函数名错误） <span class="tag tag-fix">修复</span> 首页等级显示？(函数别名缺失) <span class="tag tag-fix">修复</span> 后台统计metricRows重复 <span class="tag tag-fix">修复</span> 上一题按钮disabled缺少样式 <span class="tag tag-ref">改版</span> 成就图标flexbox居中 <span class="tag tag-ref">改版</span> 去掉冗余的成就积分显示</div></div>
       <div class="cl-item"><span class="cl-ver">V5</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 📖考点笔记功能（考试大纲篇 & 重要考点篇） <span class="tag tag-add">新增</span> 爬取108322/108323两篇学习笔记 <span class="tag tag-add">新增</span> 底部翻页按钮 <span class="tag tag-add">新增</span> 翻页自动滚动到顶部 <span class="tag tag-add">新增</span> 红色高亮重点（必考/常考/题库） <span class="tag tag-fix">修复</span> 30道多选题补充缺失的E/F选项 <span class="tag tag-fix">修复</span> 5道判断题→多选题（恢复真实选项） <span class="tag tag-fix">修复</span> 舞台模拟题二#4选项D合并到C已拆分 <span class="tag tag-fix">修复</span> 舞台模拟题二#18缺失选项B <span class="tag tag-fix">修复</span> 20道多选题答案小写→大写（判分异常） <span class="tag tag-fix">修复</span> 后台统计按钮被考点笔记容器点击覆盖 <span class="tag tag-fix">修复</span> 清理死代码和空引用 <span class="tag tag-ref">改版</span> 笔记按原网站分页符翻页 <span class="tag tag-ref">改版</span> 大纲篇按章节分页 <span class="tag tag-ref">改版</span> Made by Sisyphus</div></div>
       <div class="cl-item"><span class="cl-ver">V4</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 题型独立分组（100单选/30多选/30判断一组） <span class="tag tag-add">新增</span> 模拟卷合并为3套 <span class="tag tag-add">新增</span> 模拟考未做题也显示上下题按钮 <span class="tag tag-ref">改版</span> 去掉题型标题行，数量标在科目头部 <span class="tag tag-add">新增</span> 答题卡新增判断题分区 <span class="tag tag-ref">改版</span> 解析从题干独立到选项下方 <span class="tag tag-fix">修复</span> 判断题UI显示（✓/✗） <span class="tag tag-fix">修复</span> multiStrict判分开关生效 <span class="tag tag-fix">修复</span> 重置数据按钮对登录用户无效</div></div>
       <div class="cl-item"><span class="cl-ver">V3</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-fix">修复</span> 错题本点击跳错题循环不返回完整题库 <span class="tag tag-add">新增</span> 去重48道内部重复题（2139→2091） <span class="tag tag-fix">修复</span> 索引同步2139→2091 <span class="tag tag-fix">修复</span> 50道单选题→判断题重分类 <span class="tag tag-fix">修复</span> 括号加空格 <span class="tag tag-add">新增</span> 未答题目显示上下题按钮 <span class="tag tag-add">新增</span> 题型统计增加判断题显示 <span class="tag tag-fix">修复</span> 去重后自动清理失效做题记录</div></div>
@@ -1173,6 +1177,20 @@ async function renderAdmin() {
       ['判断题正确率', u => fmt(u.judgeAccuracy,u.judgeDone)],
       ['科目一正确率', u => fmt(u.subject1Accuracy,u.subject1Done)],
       ['科目二正确率', u => fmt(u.subject2Accuracy,u.subject2Done)],
+      ['XP', u => `<span style="color:var(--gold)">${u.xp||0}</span>`],
+      ['成就', u => {
+        const achs = u.achievements || [];
+        if (!achs.length) return '-';
+        const A = typeof ACH !== 'undefined' ? ACH : {};
+        let html = '<div style="display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:center;max-width:110px;margin:0 auto;">';
+        for (const k of achs) {
+          const icon = (A[k] && A[k].i) || '🏆';
+          const title = (A[k] && A[k].n) || k;
+          html += `<span title="${title}" style="font-size:16px;line-height:1;">${icon}</span>`;
+        }
+        html += '</div>';
+        return html;
+      }],
       ['最新登录', u => `<span style="color:var(--gold)">${fmtTime(u.lastLogin)}</span>`],
     ];
     const head = `<tr><th>指标</th>${data.users.map(u=>`<th>${u.username}</th>`).join('')}</tr>`;

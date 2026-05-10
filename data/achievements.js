@@ -102,17 +102,35 @@ function chkAch() {
   }
 }
 
+// Aliases for index.html template
+function getGameState(){return gG();}
+function calcLevel(x){return cL(x);}
+
 function goAch(){
   syncGame();chkAch();
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   let v=document.getElementById('view-achievement')||document.getElementById('view-home');
   v.innerHTML='';v.classList.add('active');
   let g=gG(),level=cL(g.xp),un=g.unlocked||{};
-  let keys=Object.keys(ACH),uc=keys.filter(k=>un[k]).length,score=uc*60+Math.floor(g.xp/10);
+  let keys=Object.keys(ACH),uc=keys.filter(k=>un[k]).length;
   let tabs=['all','growth','battle','mastery','social'].map((c,i)=>'<div class="ach-tab'+(i===0?' active':'')+'" onclick="rdAch(\''+c+'\')">'+(c==='all'?'全部':CAT[c])+'</div>').join('');
-  v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">🏆 成就</div><div class="page-sub">'+uc+'/'+keys.length+' 已解锁</div></div><div class="ach-header"><div class="ach-level-panel"><div class="ach-level-icon">Lv.'+level.lv+'</div><div class="ach-level-num">成就等级 <span class="num">'+level.lv+'</span></div><div class="ach-score">成就积分 <span class="sc">'+score+'</span></div><div class="xp-bar" style="margin:10px 0 4px"><div class="xp-fill" style="width:'+level.pct+'%"></div></div><div style="font-size:10px;color:var(--muted)">Lv.'+level.lv+'→Lv.'+(level.lv+1)+' '+level.cur+'/'+level.need+' XP</div><div class="ach-rank">🏅 '+uc+'/'+keys.length+' 成就</div><div class="ach-rank" style="border:none;padding-top:4px">'+level.title+'</div></div><div class="ach-main"><div class="ach-tabs">'+tabs+'</div><div id="achGrid"></div></div></div>';
+  v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">🏆 成就</div><div class="page-sub">'+uc+'/'+keys.length+' 已解锁</div></div><div class="ach-header"><div class="ach-level-panel"><div class="ach-level-icon">Lv.'+level.lv+'</div><div class="ach-level-num">成就等级 <span class="num">'+level.lv+'</span></div><div class="xp-bar" style="margin:10px 0 2px;height:8px;"><div class="xp-fill" style="width:'+level.pct+'%;height:8px;"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);"><span>Lv.'+level.lv+'</span><span>'+level.cur+'/'+level.need+' XP</span><span>Lv.'+(level.lv+1)+'</span></div><div class="ach-rank" style="margin-top:6px;">🏅 '+uc+'/'+keys.length+' 成就</div><div class="ach-rank" style="border:none;padding-top:4px">'+level.title+' <span style="cursor:pointer;color:var(--gold);font-size:11px;" onclick="showLevelPopup()">👑</span></div></div><div class="ach-main"><div class="ach-tabs">'+tabs+'</div><div id="achGrid"></div></div></div>';
   document.title='成就 · Agent Exam Training';
   rdAch('all');
+}
+
+function showLevelPopup(){
+  var html='<div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;" onclick="this.remove()"><div style="background:var(--bg-panel);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:420px;width:90vw;box-shadow:0 12px 60px rgba(0,0,0,.6);" onclick="event.stopPropagation()"><div style="font-size:15px;font-weight:600;color:var(--gold);margin-bottom:14px;text-align:center;">👑 称号一览</div>';
+  var g=gG(),level=cL(g.xp);
+  html+=LV.map(function(l){
+    var isCur=l[0]===level.lv;
+    var pct=isCur?level.pct:0;
+    var bar=isCur?'<div class="xp-bar" style="height:3px;margin-top:4px;"><div class="xp-fill" style="width:'+pct+'%"></div></div>':'';
+    return '<div style="display:flex;align-items:center;padding:8px 12px;border-radius:6px;'+(isCur?'background:rgba(230,184,74,.1);border:1px solid var(--gold-dim);':'')+';margin-bottom:4px;"><div style="width:40px;font-size:12px;color:var(--muted);">Lv.'+l[0]+'</div><div style="flex:1;font-size:14px;font-weight:'+(isCur?'700':'400')+';color:'+(isCur?'var(--gold)':'var(--white)')+';">'+l[2]+'</div><div style="font-size:11px;color:var(--muted);text-align:right;">'+l[1]+'XP</div></div>'+bar;
+  }).join('');
+  html+='<div style="text-align:center;margin-top:12px;"><button class="btn btn-secondary btn-small" onclick="this.closest(\'[onclick]\').remove()">关闭</button></div></div></div>';
+  var d=document.createElement('div');d.innerHTML=html;
+  document.body.appendChild(d.firstElementChild);
 }
 
 function rdAch(cat){
