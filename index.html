@@ -246,37 +246,63 @@ a { color:var(--gold); text-decoration:none; }
   .settings-panel { width:100%; max-width:100%; border-radius:0; }
 }
 
-/* 成就系统 - 游戏风格 */
+/* 成就系统 - 游戏风格(仿王者荣耀) */
 .ach-toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); z-index:999; pointer-events:none; transition:all .4s cubic-bezier(.34,1.56,.64,1); text-align:center; }
 .ach-toast.show { transform:translate(-50%,-50%) scale(1); }
-.ach-toast .ach-bg { background:linear-gradient(135deg,rgba(230,184,74,.15),rgba(230,184,74,.05)); border:2px solid var(--gold); border-radius:20px; padding:30px 50px; backdrop-filter:blur(12px); box-shadow:0 0 60px var(--gold-glow); }
-.ach-toast .ach-icon { font-size:64px; display:block; margin-bottom:8px; }
-.ach-toast .ach-name { font-size:22px; font-weight:700; color:var(--gold); text-shadow:0 0 20px var(--gold-glow); }
-.ach-toast .ach-desc { font-size:14px; color:var(--muted); margin-top:4px; }
-.ach-toast .ach-rarity { font-size:11px; margin-top:6px; letter-spacing:2px; }
-.ach-rarity-bronze { color:#cd7f32; }
-.ach-rarity-silver { color:#c0c0c0; }
-.ach-rarity-gold { color:var(--gold); }
-.ach-rarity-platinum { color:#a8e6cf; }
+.ach-toast .ach-bg { background:linear-gradient(135deg,rgba(230,184,74,.18),rgba(230,184,74,.06)); border:2px solid var(--gold); border-radius:20px; padding:30px 50px; backdrop-filter:blur(16px); box-shadow:0 0 80px var(--gold-glow),inset 0 0 40px rgba(230,184,74,.1); }
+.ach-toast .ach-icon { font-size:72px; display:block; margin-bottom:6px; }
+.ach-toast .ach-name { font-size:24px; font-weight:700; color:var(--gold); text-shadow:0 0 30px var(--gold-glow); }
+.ach-toast .ach-desc { font-size:14px; color:#8a9bb5; margin-top:4px; }
+.ach-toast .ach-rarity { font-size:12px; margin-top:6px; letter-spacing:3px; text-shadow:0 0 10px currentColor; }
 
-/* 等级面板 */
-.level-badge { display:inline-flex; align-items:center; gap:8px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:8px 16px; }
-.level-badge .lv-num { font-size:24px; font-weight:800; color:var(--gold); text-shadow:0 0 10px var(--gold-glow); }
-.level-badge .lv-title { font-size:12px; color:var(--muted); }
-.level-badge .lv-xp { font-size:11px; color:var(--muted); margin-left:4px; }
-.xp-bar { width:100%; height:4px; background:var(--bg-panel); border-radius:2px; overflow:hidden; margin-top:4px; }
-.xp-bar .xp-fill { height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:2px; transition:width .5s; }
+/* Rarity colors with glow */
+.ach-rarity-bronze { color:#cd7f32; text-shadow:0 0 8px rgba(205,127,50,.5); }
+.ach-rarity-silver { color:#c0d0e0; text-shadow:0 0 8px rgba(192,208,224,.5); }
+.ach-rarity-gold { color:var(--gold); text-shadow:0 0 12px var(--gold-glow); }
+.ach-rarity-platinum { color:#7dd3e8; text-shadow:0 0 12px rgba(125,211,232,.5); }
 
-/* 成就页 */
-.ach-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; padding:20px 24px; }
-.ach-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:16px; text-align:center; transition:all .3s; }
-.ach-card:hover { border-color:var(--gold-dim); transform:translateY(-2px); }
+/* 成就页 - 全屏暗色星空背景 */
+#view-achievement { background: radial-gradient(ellipse at 50% 0%, #0d1b2a 0%, #070e1a 100%); }
+.ach-header { display:flex; align-items:flex-start; gap:20px; padding:20px 24px; max-width:1100px; margin:0 auto; }
+.ach-level-panel { flex-shrink:0; width:200px; background:linear-gradient(180deg,rgba(230,184,74,.08),rgba(230,184,74,.02)); border:1px solid rgba(230,184,74,.15); border-radius:14px; padding:20px; text-align:center; }
+.ach-level-icon { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--gold-dim),var(--gold)); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; color:var(--bg-deep); box-shadow:0 0 30px var(--gold-glow); }
+.ach-level-num { font-size:14px; color:var(--muted); }
+.ach-level-num .num { color:var(--gold); font-weight:700; font-size:20px; }
+.ach-score { font-size:13px; color:var(--muted); margin-top:4px; }
+.ach-score .sc { color:var(--white); font-weight:600; }
+.ach-rank { font-size:11px; color:var(--muted); margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
+.ach-main { flex:1; min-width:0; }
+
+/* Category tabs */
+.ach-tabs { display:flex; gap:4px; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:0; }
+.ach-tab { padding:8px 18px; font-size:13px; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; }
+.ach-tab:hover { color:var(--white); }
+.ach-tab.active { color:var(--gold); border-bottom-color:var(--gold); position:relative; }
+.ach-tab.active::after { content:''; position:absolute; bottom:-2px; left:50%; transform:translateX(-50%); width:30px; height:2px; background:var(--gold); box-shadow:0 0 8px var(--gold-glow); }
+
+/* Achievement grid */
+.ach-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; max-width:900px; }
+.ach-card { background:rgba(17,34,54,.6); border:1px solid var(--border); border-radius:10px; padding:14px 10px; text-align:center; transition:all .3s; position:relative; overflow:hidden; }
+.ach-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:opacity .3s; }
+.ach-card:hover { border-color:var(--gold-dim); transform:translateY(-3px); box-shadow:0 6px 24px rgba(0,0,0,.3); }
+.ach-card:hover::before { opacity:1; }
 .ach-card.locked { opacity:.35; filter:grayscale(.8); }
-.ach-card .ac-icon { font-size:36px; margin-bottom:4px; }
-.ach-card .ac-name { font-size:13px; font-weight:600; color:var(--white); }
-.ach-card .ac-desc { font-size:11px; color:var(--muted); margin-top:2px; }
-.ach-card .ac-rarity { font-size:10px; margin-top:4px; }
-.ach-card .ac-date { font-size:10px; color:var(--muted); margin-top:2px; }
+.ach-card.locked .ac-icon { filter:grayscale(1); }
+.ach-card .ac-icon { font-size:36px; margin-bottom:4px; display:block; }
+.ach-card .ac-name { font-size:12px; font-weight:600; color:var(--white); line-height:1.3; }
+.ach-card .ac-desc { font-size:10px; color:#5a6a7a; margin-top:2px; line-height:1.3; }
+.ach-card .ac-rarity { font-size:9px; margin-top:4px; letter-spacing:1px; }
+.ach-card .ac-date { font-size:9px; color:var(--muted); margin-top:2px; }
+.ach-card .ac-progress { font-size:10px; color:#5a6a7a; margin-top:3px; }
+.ach-card.dim-1 { opacity:.25; }
+.ach-card.dim-2 { opacity:.35; }
+.ach-card.dim-3 { opacity:.45; }
+.ach-card .ac-glow { position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle,var(--gold-dim) 0%,transparent 60%); opacity:0; transition:opacity .4s; pointer-events:none; }
+.ach-card.gold .ac-glow { opacity:.1; }
+.ach-card.gold:hover .ac-glow { opacity:.2; }
+
+@media (max-width:900px) { .ach-grid { grid-template-columns:repeat(3,1fr); } .ach-header { flex-direction:column; align-items:stretch; } .ach-level-panel { width:100%; } }
+@media (max-width:640px) { .ach-grid { grid-template-columns:repeat(2,1fr); } }
 
 </style>
 </head>
@@ -291,6 +317,7 @@ a { color:var(--gold); text-decoration:none; }
 <div id="view-admin" class="view"></div>
 <div id="view-changelog" class="view"></div>
 <div id="view-note" class="view"></div>
+<div id="view-achievement" class="view"></div>
 
 <div class="answer-sheet-overlay" id="sheetOverlay"></div>
 <div class="answer-sheet" id="answerSheet"></div>
@@ -317,36 +344,39 @@ const DEFAULT_SETTINGS = { autoNext: true, autoDelay: 800, fontSize: 16, multiSt
 // ── Storage ──
 
 // ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // 成就系统
 // ══════════════════════════════════════════════════════
 const ACHIEVEMENTS = {
-  first_q:     { name:'初出茅庐', desc:'完成第1道题', icon:'🌱', rarity:'bronze' },
-  ten_q:       { name:'小试牛刀', desc:'完成10道题', icon:'⚔️', rarity:'bronze' },
-  fifty_q:     { name:'渐入佳境', desc:'完成50道题', icon:'🎯', rarity:'bronze' },
-  hundred_q:   { name:'百题斩',   desc:'完成100道题', icon:'🗡️', rarity:'silver' },
-  fivehundred_q:{name:'题库达人', desc:'完成500道题', icon:'👑', rarity:'gold' },
-  thousand_q:  { name:'千题高手', desc:'完成1000道题', icon:'💎', rarity:'platinum' },
-  all_q:       { name:'题海征服者',desc:'完成全部题目', icon:'⚔️', rarity:'platinum' },
-  acc_60:      { name:'稳扎稳打', desc:'50题且正确率≥60%', icon:'🛡️', rarity:'bronze' },
-  acc_80:      { name:'精准打击', desc:'100题且正确率≥80%', icon:'🎪', rarity:'silver' },
-  acc_90:      { name:'百发百中', desc:'200题且正确率≥90%', icon:'🏹', rarity:'gold' },
-  streak_5:    { name:'初露锋芒', desc:'连续答对5题', icon:'🔥', rarity:'bronze' },
-  streak_10:   { name:'势如破竹', desc:'连续答对10题', icon:'🔥', rarity:'silver' },
-  streak_20:   { name:'如有神助', desc:'连续答对20题', icon:'🔥', rarity:'gold' },
-  sub1_done:   { name:'思政达人', desc:'完成科一全部题目', icon:'📘', rarity:'gold' },
-  sub2_done:   { name:'实务精英', desc:'完成科二全部题目', icon:'📙', rarity:'gold' },
-  wrong_zero:  { name:'一尘不染', desc:'错题本清零', icon:'🧹', rarity:'silver' },
+  first_q:     { name:'初出茅庐',   desc:'完成第1道题',          icon:'🌱', rarity:'bronze', cat:'growth' },
+  ten_q:       { name:'小试牛刀',   desc:'完成10道题',          icon:'⚔️', rarity:'bronze', cat:'growth' },
+  fifty_q:     { name:'渐入佳境',   desc:'完成50道题',          icon:'🎯', rarity:'bronze', cat:'growth' },
+  hundred_q:   { name:'百题斩',     desc:'完成100道题',          icon:'🗡️', rarity:'silver', cat:'growth' },
+  fivehundred_q:{name:'题库达人',   desc:'完成500道题',          icon:'👑', rarity:'gold',   cat:'growth' },
+  thousand_q:  { name:'千题高手',   desc:'完成1000道题',         icon:'💎', rarity:'platinum',cat:'growth' },
+  all_q:       { name:'题海征服者', desc:'完成全部2091道题',      icon:'⚔️', rarity:'platinum',cat:'growth' },
+  acc_60:      { name:'稳扎稳打',   desc:'50题·正确率≥60%',     icon:'🛡️', rarity:'bronze', cat:'battle' },
+  acc_80:      { name:'精准打击',   desc:'100题·正确率≥80%',    icon:'🎪', rarity:'silver', cat:'battle' },
+  acc_90:      { name:'百发百中',   desc:'200题·正确率≥90%',    icon:'🏹', rarity:'gold',   cat:'battle' },
+  streak_5:    { name:'初露锋芒',   desc:'连续答对5题',          icon:'🔥', rarity:'bronze', cat:'battle' },
+  streak_10:   { name:'势如破竹',   desc:'连续答对10题',         icon:'🔥', rarity:'silver', cat:'battle' },
+  streak_20:   { name:'如有神助',   desc:'连续答对20题',         icon:'🔥', rarity:'gold',   cat:'battle' },
+  sub1_done:   { name:'思政达人',   desc:'完成科一全部885题',     icon:'📘', rarity:'gold',   cat:'mastery' },
+  sub2_done:   { name:'实务精英',   desc:'完成科二全部781题',     icon:'📙', rarity:'gold',   cat:'mastery' },
+  wrong_zero:  { name:'一尘不染',   desc:'错题本全部清零',        icon:'🧹', rarity:'silver', cat:'social' },
 };
 
+const CAT_NAMES = { growth:'成长', battle:'对局', mastery:'专精', social:'社交' };
+
 const LEVEL_TABLE = [
-  { lv:1, xp:0,    title:'学徒' },    { lv:2, xp:50,   title:'练习生' },
-  { lv:3, xp:120,  title:'考生' },    { lv:4, xp:250,  title:'备考者' },
-  { lv:5, xp:500,  title:'赶考人' },  { lv:6, xp:800,  title:'秀才' },
-  { lv:7, xp:1200, title:'举人' },    { lv:8, xp:1800, title:'贡士' },
-  { lv:9, xp:2600, title:'进士' },    { lv:10,xp:3600, title:'探花' },
-  { lv:11,xp:5000, title:'榜眼' },    { lv:12,xp:7000, title:'状元' },
-  { lv:13,xp:10000,title:'大学士' },  { lv:14,xp:14000,title:'太傅' },
-  { lv:15,xp:20000,title:'国士无双' },
+  { lv:1,  xp:0,     title:'学徒' },    { lv:2,  xp:50,    title:'练习生' },
+  { lv:3,  xp:120,   title:'考生' },     { lv:4,  xp:250,   title:'备考者' },
+  { lv:5,  xp:500,   title:'赶考人' },   { lv:6,  xp:800,   title:'秀才' },
+  { lv:7,  xp:1200,  title:'举人' },     { lv:8,  xp:1800,  title:'贡士' },
+  { lv:9,  xp:2600,  title:'进士' },     { lv:10, xp:3600,  title:'探花' },
+  { lv:11, xp:5000,  title:'榜眼' },     { lv:12, xp:7000,  title:'状元' },
+  { lv:13, xp:10000, title:'大学士' },   { lv:14, xp:14000, title:'太傅' },
+  { lv:15, xp:20000, title:'国士无双' },
 ];
 
 function getGameState() {
@@ -356,14 +386,12 @@ function getGameState() {
   if (!p.game.answeredIds) p.game.answeredIds = [];
   return p.game;
 }
-
 function saveGameState(g) {
   const p = loadProgress();
   p.game = g;
-  if (g.answeredIds.length > 1000) g.answeredIds = g.answeredIds.slice(-500); // cap
+  if (g.answeredIds.length > 1000) g.answeredIds = g.answeredIds.slice(-500);
   saveProgress(p);
 }
-
 function calcLevel(xp) {
   let lv = LEVEL_TABLE[0];
   for (let i = LEVEL_TABLE.length - 1; i >= 0; i--) {
@@ -371,14 +399,12 @@ function calcLevel(xp) {
   }
   const nextIdx = LEVEL_TABLE.findIndex(l => l.xp > xp);
   const next = nextIdx >= 0 ? LEVEL_TABLE[nextIdx] : null;
-  const currentXp = xp - lv.xp;
-  const neededXp = next ? next.xp - lv.xp : currentXp;
-  return { ...lv, xp, currentXp, neededXp, pct: neededXp > 0 ? Math.round(currentXp / neededXp * 100) : 100 };
+  const cur = xp - lv.xp;
+  const need = next ? next.xp - lv.xp : cur;
+  return { ...lv, xp, currentXp:cur, neededXp:need, pct: need > 0 ? Math.round(cur/need*100) : 100 };
 }
-
 function awardXp(amount, qid, correct) {
   const g = getGameState();
-  // Prevent duplicate XP for same question
   if (g.answeredIds.includes(qid)) return false;
   g.answeredIds.push(qid);
   g.xp += amount;
@@ -388,955 +414,198 @@ function awardXp(amount, qid, correct) {
   return true;
 }
 
+function getAchievementProgress(key) {
+  const p = loadProgress();
+  const records = p.records || {};
+  const answered = Object.keys(records).length;
+  const correct = Object.values(records).filter(r=>r?.correct).length;
+  const acc = answered > 0 ? Math.round(correct/answered*100) : 0;
+  const wrong = (p.wrong||[]).length;
+  const g = getGameState();
+  const idx = indexData;
+  const s1 = idx?.['科目一']?.['主题库']?.['_小计'];
+  const s2 = idx?.['科目二']?.['主题库']?.['_小计'];
+  
+  const progress = {
+    first_q:     [answered, 1],
+    ten_q:       [answered, 10],
+    fifty_q:     [answered, 50],
+    hundred_q:   [answered, 100],
+    fivehundred_q:[answered, 500],
+    thousand_q:  [answered, 1000],
+    all_q:       [answered, 2091],
+    acc_60:      [answered >= 50 ? Math.min(acc,60) : 0, 60],
+    acc_80:      [answered >= 100 ? Math.min(acc,80) : 0, 80],
+    acc_90:      [answered >= 200 ? Math.min(acc,90) : 0, 90],
+    streak_5:    [Math.min(g.maxStreak,5), 5],
+    streak_10:   [Math.min(g.maxStreak,10), 10],
+    streak_20:   [Math.min(g.maxStreak,20), 20],
+    sub1_done:   [answeredQuestionsInSubject('科目一'), s1 ? s1['总题数'] : 0],
+    sub2_done:   [answeredQuestionsInSubject('科目二'), s2 ? s2['总题数'] : 0],
+    wrong_zero:  [Math.max(0,10 - wrong), 10],
+  };
+  return progress[key] || [0,1];
+}
+
+function answeredQuestionsInSubject(subject) {
+  const p = loadProgress();
+  let c = 0;
+  for (const src of getAllSources(subject)) {
+    const sq = questionCache[src.file];
+    if (!sq) continue;
+    for (const q of sq) { if (p.records[q.id]) c++; }
+  }
+  return c;
+}
+
 function checkAchievements() {
   const p = loadProgress();
   const g = getGameState();
   const records = p.records || {};
   const answered = Object.keys(records).length;
-  const correctCount = Object.values(records).filter(r => r?.correct).length;
-  const acc = answered > 0 ? Math.round(correctCount / answered * 100) : 0;
-  const wrongCount = (p.wrong || []).length;
+  const correct = Object.values(records).filter(r=>r?.correct).length;
+  const acc = answered > 0 ? Math.round(correct/answered*100) : 0;
+  const wrong = (p.wrong||[]).length;
   const unlocked = g.unlocked || {};
-  const newlyUnlocked = [];
+  const newly = [];
+  const idx = indexData;
+  const s1 = idx?.['科目一']?.['主题库']?.['_小计'];
+  const s2 = idx?.['科目二']?.['主题库']?.['_小计'];
   
   const checks = {
-    first_q:     () => answered >= 1,
-    ten_q:       () => answered >= 10,
-    fifty_q:     () => answered >= 50,
-    hundred_q:   () => answered >= 100,
+    first_q:     ()=> answered >= 1,
+    ten_q:       ()=> answered >= 10,
+    fifty_q:     ()=> answered >= 50,
+    hundred_q:   ()=> answered >= 100,
     fivehundred_q:()=> answered >= 500,
-    thousand_q:  () => answered >= 1000,
-    all_q:       () => answered >= 2091,
-    acc_60:      () => answered >= 50 && acc >= 60,
-    acc_80:      () => answered >= 100 && acc >= 80,
-    acc_90:      () => answered >= 200 && acc >= 90,
-    streak_5:    () => g.maxStreak >= 5,
-    streak_10:   () => g.maxStreak >= 10,
-    streak_20:   () => g.maxStreak >= 20,
-    sub1_done:   () => { const idx=indexData; const t=idx?.['科目一']?.['主题库']?.['_小计']; return t ? answeredQuestionsInSubject('科目一') >= t['总题数'] : false; },
-    sub2_done:   () => { const idx=indexData; const t=idx?.['科目二']?.['主题库']?.['_小计']; return t ? answeredQuestionsInSubject('科目二') >= t['总题数'] : false; },
-    wrong_zero:  () => wrongCount === 0 && answered >= 10,
+    thousand_q:  ()=> answered >= 1000,
+    all_q:       ()=> answered >= 2091,
+    acc_60:      ()=> answered >= 50 && acc >= 60,
+    acc_80:      ()=> answered >= 100 && acc >= 80,
+    acc_90:      ()=> answered >= 200 && acc >= 90,
+    streak_5:    ()=> g.maxStreak >= 5,
+    streak_10:   ()=> g.maxStreak >= 10,
+    streak_20:   ()=> g.maxStreak >= 20,
+    sub1_done:   ()=> s1 ? answeredQuestionsInSubject('科目一') >= s1['总题数'] : false,
+    sub2_done:   ()=> s2 ? answeredQuestionsInSubject('科目二') >= s2['总题数'] : false,
+    wrong_zero:  ()=> wrong === 0 && answered >= 10,
   };
-  
-  for (const [key, check] of Object.entries(checks)) {
-    if (!unlocked[key] && check()) {
+  for (const [key, fn] of Object.entries(checks)) {
+    if (!unlocked[key] && fn()) {
       unlocked[key] = Date.now();
-      newlyUnlocked.push(key);
+      newly.push(key);
     }
   }
-  
-  if (newlyUnlocked.length > 0) {
+  if (newly.length > 0) {
     g.unlocked = unlocked;
     saveGameState(g);
-    // Show popup for latest achievement
-    const last = newlyUnlocked[newlyUnlocked.length - 1];
-    const ach = ACHIEVEMENTS[last];
-    showAchievementPopup(ach, last);
+    const last = newly[newly.length-1];
+    showAchievementPopup(ACHIEVEMENTS[last], last);
   }
-}
-
-function answeredQuestionsInSubject(subject) {
-  const progress = loadProgress();
-  let count = 0;
-  const sources = getAllSources(subject);
-  for (const src of sources) {
-    const sq = questionCache[src.file];
-    if (!sq) continue;
-    for (const q of sq) { if (progress.records[q.id]) count++; }
-  }
-  return count;
 }
 
 function showAchievementPopup(ach, key) {
   const el = document.getElementById('achToast');
   if (!el) return;
-  const rarityMap = { bronze:'铜', silver:'银', gold:'金', platinum:'铂金' };
+  const rar = { bronze:'铜·成就', silver:'银·成就', gold:'金·成就', platinum:'铂金·成就' };
   document.getElementById('achToastIcon').textContent = ach.icon;
-  document.getElementById('achToastName').textContent = '🏆 ' + ach.name;
+  document.getElementById('achToastName').textContent = ach.name;
   document.getElementById('achToastDesc').textContent = ach.desc;
-  const rarEl = document.getElementById('achToastRarity');
-  rarEl.innerHTML = '✦ ' + rarityMap[ach.rarity] || ach.rarity + ' 成就 ✦';
-  rarEl.className = 'ach-rarity ach-rarity-' + ach.rarity;
+  const r = document.getElementById('achToastRarity');
+  r.textContent = '✦ ' + (rar[ach.rarity]||ach.rarity) + ' ✦';
+  r.className = 'ach-rarity ach-rarity-' + ach.rarity;
   el.classList.add('show');
-  setTimeout(() => { el.classList.remove('show'); }, 2500);
+  setTimeout(()=>el.classList.remove('show'), 3000);
 }
 
 function renderAchievements() {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('view-subject'); // reuse subject view
+  const v = document.getElementById('view-achievement');
+  v.innerHTML = '';
+  v.classList.add('active');
+  
   const g = getGameState();
   const level = calcLevel(g.xp);
   const unlocked = g.unlocked || {};
-  const unlockedCount = Object.keys(unlocked).length;
-  const totalCount = Object.keys(ACHIEVEMENTS).length;
+  const allKeys = Object.keys(ACHIEVEMENTS);
+  const unlockedCount = allKeys.filter(k => unlocked[k]).length;
+  const totalCount = allKeys.length;
+  const achScore = unlockedCount * 60 + Math.floor(g.xp / 10);
   
-  let html = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">🏆 成就</div><div class="page-sub">' + unlockedCount + '/' + totalCount + ' 已解锁</div></div>';
-  
-  // Level display
-  html += '<div style="max-width:700px;margin:12px auto 0;padding:0 24px;text-align:center;">';
-  html += '<div class="level-badge"><span class="lv-num">Lv.' + level.lv + '</span><span class="lv-title">' + level.title + '</span><span class="lv-xp">⚡' + level.xp + 'XP</span></div>';
-  if (level.neededXp > 0) {
-    html += '<div class="xp-bar" style="max-width:300px;margin:6px auto 0;"><div class="xp-fill" style="width:' + level.pct + '%"></div></div>';
-    html += '<div style="font-size:10px;color:var(--muted);margin-top:2px;">下一级: ' + (level.currentXp) + '/' + level.neededXp + ' XP</div>';
-  }
+  // Left panel: level + stats + rank
+  let html = '<div class="ach-header">';
+  html += '<div class="ach-level-panel">';
+  html += '<div class="ach-level-icon">Lv.' + level.lv + '</div>';
+  html += '<div class="ach-level-num">成就等级 <span class="num">' + level.lv + '</span></div>';
+  html += '<div class="ach-score">成就积分 <span class="sc">' + achScore + '</span></div>';
+  html += '<div class="xp-bar" style="margin:10px 0 4px;"><div class="xp-fill" style="width:' + level.pct + '%"></div></div>';
+  html += '<div style="font-size:10px;color:var(--muted);">Lv.' + level.lv + ' → Lv.' + (level.lv+1) + ' &nbsp;' + level.currentXp + '/' + level.neededXp + ' XP</div>';
+  html += '<div class="ach-rank">🏅 ' + unlockedCount + '/' + totalCount + ' 成就</div>';
+  html += '<div class="ach-rank" style="border:none;padding-top:4px;">' + level.title + '</div>';
   html += '</div>';
   
-  // Achievement grid
-  html += '<div class="ach-grid">';
-  for (const [key, ach] of Object.entries(ACHIEVEMENTS)) {
-    const isUnlocked = !!unlocked[key];
-    const rarityMap = { bronze:'铜', silver:'银', gold:'金', platinum:'铂金' };
-    const dateStr = isUnlocked ? new Date(unlocked[key]).toLocaleDateString('zh-CN', {month:'numeric',day:'numeric'}) : '';
-    html += '<div class="ach-card ' + (isUnlocked ? '' : 'locked') + '">';
-    html += '<div class="ac-icon">' + ach.icon + '</div>';
-    html += '<div class="ac-name">' + ach.name + '</div>';
-    html += '<div class="ac-desc">' + ach.desc + '</div>';
-    html += '<div class="ac-rarity ach-rarity-' + ach.rarity + '">' + (isUnlocked ? '✦ ' + (rarityMap[ach.rarity]||ach.rarity) : '🔒 未解锁') + '</div>';
-    if (isUnlocked && dateStr) html += '<div class="ac-date">' + dateStr + '</div>';
-    html += '</div>';
-  }
-  html += '</div>';
+  // Main area
+  html += '<div class="ach-main"><div class="ach-tabs" id="achTabs">';
+  html += '<div class="ach-tab active" onclick="renderAchievementGrid(\'all\')">全部</div>';
+  html += '<div class="ach-tab" onclick="renderAchievementGrid(\'growth\')">成长</div>';
+  html += '<div class="ach-tab" onclick="renderAchievementGrid(\'battle\')">对局</div>';
+  html += '<div class="ach-tab" onclick="renderAchievementGrid(\'mastery\')">专精</div>';
+  html += '<div class="ach-tab" onclick="renderAchievementGrid(\'social\')">社交</div>';
+  html += '</div><div id="achGridContainer"></div></div></div>';
   
   v.innerHTML = html;
   document.title = '成就 · Agent Exam Training';
-  v.classList.add('active');
-}
-
-function blankProgress() { return { records:{}, wrong:[], stats:{total:0,correct:0} }; }
-function normalizeProgress(p) { p=p&&typeof p==='object'?p:blankProgress(); p.records=p.records||{}; p.wrong=p.wrong||[]; p.stats=p.stats||{total:0,correct:0}; return p; }
-function loadProgress() { return normalizeProgress(currentProgress); }
-function saveProgress(p) {
-  currentProgress = normalizeProgress(p);
-  localStorage.setItem(`${LS_KEY}_${currentUser?.username||'guest'}`, JSON.stringify(currentProgress));
-  if(authToken) fetch('/api/progress', {method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`}, body:JSON.stringify({progress:currentProgress})}).catch(()=>{});
-}
-function getSettings() {
-  try { return {...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SET_KEY))}; }
-  catch { return {...DEFAULT_SETTINGS}; }
-}
-function saveSettings(s) { localStorage.setItem(SET_KEY, JSON.stringify(s)); }
-
-function getRecord(qid) { const p=loadProgress(); return p.records[qid]||null; }
-function setRecord(qid,correct,answer) {
-  const p=loadProgress();
-  p.records[qid]={correct,answer,time:Date.now()};
-  p.stats.total++;
-  if(correct) p.stats.correct++;
-  if(!correct && !p.wrong.includes(qid)) p.wrong.push(qid);
-  if(correct) p.wrong = p.wrong.filter(w=>w!==qid);
-  saveProgress(p);
-  // Game system
-  const xpAmount = correct ? 10 : 2;
-  if (awardXp(xpAmount, qid, correct)) {
-    checkAchievements();
-  }
-}
-function markMastered(qid) { const p=loadProgress(); p.wrong=p.wrong.filter(w=>w!==qid); saveProgress(p); }
-function getStats() { const p=loadProgress(); const meta=allQuestionMeta||{};
-  // Filter stale records and wrong qids
-  if (meta && Object.keys(meta).length > 0) {
-    const validIds = new Set(Object.keys(meta));
-    let changed = false;
-    for (const qid of Object.keys(p.records)) { if (!validIds.has(qid)) { delete p.records[qid]; changed = true; } }
-    p.wrong = p.wrong.filter(w => validIds.has(w));
-    if (changed) saveProgress(p);
-  }
-  return {...p.stats, wrong: p.wrong.length}; }
-function clearWrong(qids) { const p=loadProgress(); p.wrong=qids?p.wrong.filter(w=>!qids.includes(w)):[]; saveProgress(p); }
-
-// ── Auth ──
-function isLoggedIn() { return !!(currentUser && authToken); }
-function authHeaders() { return authToken ? {'Authorization':`Bearer ${authToken}`} : {}; }
-function renderLogin(message='') {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('view-login');
-  v.innerHTML=`<div class="login-panel">
-    <div class="lp-title">🎭 演出经纪人题库</div>
-    <div class="lp-sub">请输入用户名和密码后开始练习</div>
-    <input class="login-input" id="loginUser" placeholder="用户名" autocomplete="username">
-    <input class="login-input" id="loginPass" placeholder="密码" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
-    <div class="login-error" id="loginError">${message||''}</div>
-    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">登录</button>
-  </div>`;
-  v.classList.add('active');
-  setTimeout(()=>document.getElementById('loginUser')?.focus(),50);
-}
-async function doLogin() {
-  const username=document.getElementById('loginUser')?.value.trim();
-  const password=document.getElementById('loginPass')?.value || '';
-  const err=document.getElementById('loginError');
-  try {
-    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
-    const data=await r.json();
-    if(!r.ok) throw new Error(data.error||'登录失败');
-    authToken=data.token; currentUser={username:data.username, role:data.role}; currentProgress=normalizeProgress(data.progress);
-    localStorage.setItem(AUTH_KEY, JSON.stringify({token:authToken, user:currentUser}));
-    localStorage.setItem(`${LS_KEY}_${currentUser.username}`, JSON.stringify(currentProgress));
-    navigate('#home');
-  } catch(e) { if(err) err.textContent=e.message || '登录失败'; }
-}
-function logout() { localStorage.removeItem(AUTH_KEY); authToken=null; currentUser=null; currentProgress=blankProgress(); renderLogin('已退出登录'); }
-async function restoreLogin() {
-  try {
-    const raw=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');
-    if(!raw?.token) return false;
-    authToken=raw.token; currentUser=raw.user;
-    const r=await fetch('/api/me',{headers:authHeaders()});
-    if(!r.ok) throw new Error('expired');
-    const data=await r.json(); currentUser={username:data.username, role:data.role}; currentProgress=normalizeProgress(data.progress);
-    return true;
-  } catch { localStorage.removeItem(AUTH_KEY); authToken=null; currentUser=null; currentProgress=blankProgress(); return false; }
-}
-
-// ── Data Loading ──
-async function loadIndex() { if(indexData) return indexData; const r=await fetch(`${DATA_DIR}/index.json`, {cache:'no-store'}); indexData=await r.json(); return indexData; }
-async function loadQuestions(fn) { if(questionCache[fn]) return questionCache[fn]; const r=await fetch(`${DATA_DIR}/${fn}`, {cache:'no-store'}); questionCache[fn]=await r.json(); return questionCache[fn]; }
-async function loadAllQuestionMeta() {
-  if(allQuestionMeta) return allQuestionMeta;
-  const r = await fetch(`${DATA_DIR}/all_questions.json`, {cache:'no-store'});
-  const arr = await r.json();
-  allQuestionMeta = {};
-  for(const q of arr) allQuestionMeta[q.id] = { type:q['题型']||'', subject:q['科目']||'' };
-  return allQuestionMeta;
-}
-function calcRate(records, predicate) {
-  let total=0, correct=0;
-  for(const [qid, rec] of Object.entries(records||{})) {
-    const meta = allQuestionMeta?.[qid] || {};
-    if(!predicate(meta, qid, rec)) continue;
-    total++;
-    if(rec?.correct) correct++;
-  }
-  return { total, correct, accuracy: total ? Math.round(correct/total*100) : 0 };
-}
-function formatRateBox(label, item) {
-  return `<div class="stat-mini"><div class="sm-label">${label}</div><div class="sm-value">${item.total?item.accuracy+'%':'-'}<span class="sm-sub">${item.total?`(${item.total})`:''}</span></div></div>`;
-}
-function getFileFromSrc(subject,src) {
-  const idx=indexData; if(!idx[subject]) return null;
-  for(const qt of ['主题库','模拟卷']) if(idx[subject][qt] && idx[subject][qt][src]) return idx[subject][qt][src]['文件'];
-  return null;
-}
-function getAllSources(subject) {
-  const idx=indexData; const sources=[];
-  for(const qt of ['主题库','模拟卷']) {
-    const g=idx[subject]?.[qt]; if(!g) continue;
-    for(const [name,info] of Object.entries(g)) { if(name.startsWith('_')) continue; sources.push({name,file:info['文件'],total:info['总题数'],type:qt,subject}); }
-  }
-  return sources;
-}
-async function getQuestionsBySource(source) {
-  for(const km of ['科目一','科目二','综合']) { const f=getFileFromSrc(km,source); if(f) return await loadQuestions(f); }
-  return null;
-}
-
-function getSourceSubjectHash(source) {
-  if(!indexData || !source) return '#home';
-  for(const km of ['科目一','科目二','综合']) {
-    for(const qt of ['主题库','模拟卷']) {
-      const group=indexData[km]?.[qt]; if(!group) continue;
-      if(group[source]) {
-        if(km==='科目一') return '#s1';
-        if(km==='科目二') return '#s2';
-        return '#home';
-      }
-    }
-  }
-  return '#home';
-}
-function goBackFromQuestion() {
-  if(quizState.isExam) { showExamPicker(); return; }
-  if(quizState.wrongMode) { navigate('#review'); return; }
-  // Batch mode: source = "科目一 · 单选题 第1组" etc.
-  const src = quizState.source;
-  if(src.includes('科目一')) { navigate('#s1'); return; }
-  if(src.includes('科目二')) { navigate('#s2'); return; }
-  navigate(getSourceSubjectHash(src));
-}
-
-function getQuestionUrl(q) {
-  const m = String(q?.id || '').match(/_(\d{6})_/);
-  return m ? `https://www.ycjjr.net/article/${m[1]}.html` : '';
-}
-function getQuestionArticleId(q) {
-  const m = String(q?.id || '').match(/_(\d{6})_/);
-  return m ? m[1] : '';
-}
-
-function formatSourceName(source, subject='') {
-  if(!source) return '';
-  const km = subject || (source.includes('思想政治') ? '科目一' : (source.includes('演出市场') ? '科目二' : ''));
-  if(indexData && (km==='科目一' || km==='科目二')) {
-    const arr = getAllSources(km).filter(s=>s.type==='主题库');
-    const idx = arr.findIndex(s=>s.name===source);
-    if(idx >= 0) return `${km==='科目一'?'基础题库':'实务题库'} ${String(idx+1).padStart(2,'0')}`;
-  }
-  return source.replace(/^思想政治与法律基础_/, '').replace(/^演出市场政策与经纪实务_/, '');
-}
-
-// ── Routing ──
-function navigate(hash) {
-  if(!isLoggedIn()) { renderLogin(); return; }
-  // Clean up transient UI
-  if(examTimer) { clearInterval(examTimer); examTimer=null; }
-  document.getElementById('sheetOverlay')?.classList.remove('show');
-  document.getElementById('answerSheet')?.classList.remove('show');
-  hideSettings?.();
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const route=hash.replace('#','')||'home';
-  const parts=route.split('/').map(p=>decodeURIComponent(p));
-  const page=parts[0];
-  switch(page) {
-    case 'home': renderHome(); break;
-    case 's1': renderSubject('科目一'); break;
-    case 's2': renderSubject('科目二'); break;
-    case 'quiz': renderQuiz(parts[1], parts.length>2 ? parts[2] : null); break;
-    case 'exam': renderExam(parts[1]); break;
-    case 'review': renderReview(); break;
-    case 'admin': renderAdmin(); break;
-    case 'ach': renderAchievements(); break;
-    case 'changelog': renderChangelog(); break;
-    case 'wrong': renderWrongQuiz(parts[1]||null); break;
-    case 'batch': renderBatch(parts[1], parts[2], parseInt(parts[3])||0); break;
-    case 'note': renderNote(parts[1]||null); break;
-    default: renderHome();
-  }
-}
-window.addEventListener('hashchange',()=>navigate(location.hash));
-window.addEventListener('load',()=>navigate(location.hash));
-document.addEventListener('keydown', handleKeydown);
-
-// ── Keyboard shortcuts ──
-function handleKeydown(e) {
-  const quizActive = document.getElementById('view-quiz').classList.contains('active') ||
-                     document.getElementById('view-exam').classList.contains('active');
-  if (!quizActive) return;
-  const key = e.key.toUpperCase();
-  if (/^[ABCD]$/.test(key) && !quizState.answered) {
-    e.preventDefault();
-    const opts = document.querySelectorAll('.quiz-option');
-    for(const o of opts) { if(o.dataset.key===key) { selectOption(o,quizState.isMulti); break; } }
-    return;
-  }
-  if (key==='ENTER' && !quizState.answered) { e.preventDefault(); submitAnswer(); return; }
-  if (key==='ARROWLEFT') { e.preventDefault(); previousQuestion(); return; }
-  if (key==='ARROWRIGHT') { e.preventDefault(); nextQuestion(); return; }
-}
-
-// ── Home ──
-async function renderHome() {
-  const v=document.getElementById('view-home'); await loadIndex(); await loadAllQuestionMeta();
-  const stats=getStats(); const rawRecords=loadProgress().records||{};
-  // Filter out stale records (questions that no longer exist after dedup)
-  const records=allQuestionMeta ? Object.fromEntries(Object.entries(rawRecords).filter(([qid])=>allQuestionMeta[qid])) : rawRecords;
-  let totalAll=0;
-  for(const km of ['科目一','科目二','综合']) for(const qt of ['主题库','模拟卷']) { const sub=indexData[km]?.[qt]?.['_小计']; if(sub) totalAll+=sub['总题数']; }
-  const answeredCount = Object.keys(records).length;
-  const correctCount = Object.values(records).filter(r=>r?.correct).length;
-  const pct=totalAll>0?Math.round(answeredCount/totalAll*100):0;
-  const wc=stats.wrong||0;
-  const singleRate=calcRate(records, m=>m.type==='单选题');
-  const multiRate=calcRate(records, m=>m.type==='多选题');
-  const judgeRate=calcRate(records, m=>m.type==='判断题');
-  const s1Rate=calcRate(records, m=>m.subject==='科目一');
-  const s2Rate=calcRate(records, m=>m.subject==='科目二');
   
-  v.innerHTML=`
-    <div class="title-logo"><div class="zh">🎭 演出经纪人</div><div class="en">Performance Agent · Exam Training</div><div class="deco-line"></div><div class="en" style="margin-top:6px;font-size:13px;color:var(--muted);letter-spacing:2px;">题库演练系统 V5</div></div></div>
-    <div class="dashboard-grid">
-      <div class="dash-card" onclick="navigate('#s1')"><div class="icon">📘</div><div class="label">科目一</div><div class="count">思想政治与法律基础</div><div class="detail">${indexData['科目一']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
-      <div class="dash-card" onclick="navigate('#s2')"><div class="icon">📙</div><div class="label">科目二</div><div class="count">演出市场政策与经纪实务</div><div class="detail">${indexData['科目二']?.['主题库']?.['_小计']?.['总题数']||0} 题</div></div>
-      <div class="dash-card" onclick="navigate('#review')"><div class="icon">📕</div><div class="label">错题本</div><div class="count">${wc} 题待复习</div><div class="detail" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc>0?'⚠ 需要巩固':'✅ 暂无错题'}</div></div>
-      <div class="dash-card" onclick="showExamPicker()"><div class="icon">📝</div><div class="label">模拟考试</div><div class="count">限时训练</div><div class="detail">${(()=>{let t=0;for(const k of ['科目一','科目二','综合']){const s=indexData[k]?.['模拟卷']?.['_小计'];if(s)t+=s['总题数']}return t})()} 题 · 多套可选</div></div>
-    </div>
-    <div class="stats-panel">
-      <div class="s-title" style="cursor:pointer" onclick="navigate('#note')">📖 考点笔记 <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:8px;">考试大纲 & 重点知识汇总</span></div>
-      <div class="s-title">📊 学习统计</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <div class="stats-row"><span>当前用户: <span class="num">${currentUser?.username||''}</span></span><span>已做题数: <span class="num">${answeredCount}</span> / ${totalAll}</span><span>总正确率: <span class="num">${answeredCount?Math.round(correctCount/answeredCount*100):0}%</span></span><span>待复习: <span class="num" style="color:${wc>0?'var(--red)':'var(--teal)'}">${wc}</span></span><span style="cursor:pointer;color:var(--gold)" onclick="navigate('#ach')">🏆 成就</span><span style="margin-left:auto;cursor:pointer;color:var(--muted)" onclick="showSettings()">⚙️ 设置</span>${currentUser?.role === 'admin' ? `<span style="cursor:pointer;color:var(--gold)" onclick="navigate('#admin')">📊 后台统计</span>` : ''}<span style="cursor:pointer;color:var(--muted)" onclick="logout()">退出</span></div>
-      <div class="stat-grid">
-        <div class="stat-mini"><div class="sm-label">已做题数</div><div class="sm-value">${answeredCount}<span class="sm-sub">/${totalAll}</span></div></div>
-        ${formatRateBox('单选正确率', singleRate)}
-        ${formatRateBox('多选正确率', multiRate)}
-        ${formatRateBox('判断题正确率', judgeRate)}
-        ${formatRateBox('科目一正确率', s1Rate)}
-        ${formatRateBox('科目二正确率', s2Rate)}
-      </div>
-    </div>
-    <div style="margin-top:8px;text-align:center;display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;">
-      <span style="font-size:11px;color:var(--muted);cursor:pointer" onclick="navigate('#changelog')">题库演练系统 V5 · 📜 版本记录</span>
-      <span style="font-size:11px;color:var(--muted);cursor:pointer" onclick="navigate('#ach')">🏆 Lv.${(()=>{try{const g=getGameState();const l=calcLevel(g.xp);return l.lv+' '+l.title+' ⚡'+l.xp+'XP';}catch(e){return '?'}})()}</span>
-      <span style="font-size:10px;color:var(--muted);opacity:.5">Made by Sisyphus 🏹</span>
-    </div>
-  `;
-  document.title = 'Agent Exam Training · 演出经纪人题库';
-  document.getElementById('view-home').classList.add('active');
+  // Store state for grid rendering
+  window.__achState = { unlocked, level, g };
+  renderAchievementGrid('all');
 }
 
-// ── Exam Picker ──
-async function showExamPicker() {
-  await loadIndex();
-  if(examTimer) { clearInterval(examTimer); examTimer=null; }
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('sheetOverlay').classList.remove('show');
-  document.getElementById('answerSheet').classList.remove('show');
-  let html = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">📝 选择模拟卷</div></div><div class="set-grid">';
-  for(const km of ['科目一','科目二','综合']) {
-    const mockGroup = indexData[km]?.['模拟卷'];
-    if(!mockGroup) continue;
-    for(const [name,info] of Object.entries(mockGroup)) {
-      if(name.startsWith('_')) continue;
-      html += `<div class="set-card" onclick="navigate('#exam/${encodeURIComponent(name)}')"><div class="s-title">${formatSourceName(name, km)}</div><div class="s-count">${info['总题数']} 题 · ${info['单选题']}单选${info['多选题']?` · ${info['多选题']}多选`:''}${info['判断题']?` · ${info['判断题']}判断`:''}</div><div class="s-progress">限时 50 分钟 · 顺序答题</div></div>`;
-    }
-  }
-  // Also list mock files that are in 综合
-  html += '</div>';
-  const v=document.getElementById('view-exam'); v.innerHTML=html; document.title='选择模拟卷 · 演出经纪人'; v.classList.add('active');
-}
-
-// ── Subject ──
-async function renderSubject(subject) {
-  const v=document.getElementById('view-subject'); await loadIndex();
-  const subInfo = { '科目一':{name:'思想政治与法律基础',icon:'📘'}, '科目二':{name:'演出市场政策与经纪实务',icon:'📙'}, '综合':{name:'综合',icon:'📚'} }[subject]||{name:subject,icon:'📚'};
-  
-  if (subject === '综合') {
-    let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}</div></div><div class="set-grid">`;
-    const sources=getAllSources(subject);
-    for(const src of sources) {
-      const sq=await loadQuestions(src.file);
-      const sn=formatSourceName(src.name, subject);
-      html+=`<div class="set-card" onclick="navigate('#exam/${encodeURIComponent(src.name)}')"><div class="s-title">${sn}</div><div class="s-count">${src.total} 题 · ${sq.filter(q=>q.题型==='单选题').length}单选 ${sq.filter(q=>q.题型==='多选题').length}多选${(()=>{const jc=sq.filter(q=>q.题型==='判断题').length;return jc?` ${jc}判断`:''})()}</div><div class="s-progress">限时 50 分钟 · 顺序答题</div></div>`;
-    }
-    html+='</div>';
-    v.innerHTML=html;
-  } else {
-    // 科目一/科目二: group by type with batch sizes
-    const BATCH = { '单选题':100, '多选题':30, '判断题':30 };
-    const TYPE_ICON = { '单选题':'🔵', '多选题':'📌', '判断题':'🔘' };
-    const progress=loadProgress();
-    
-    // Pre-load all questions for this subject once
-    const allQuestions = [];
-    const sources=getAllSources(subject);
-    for(const src of sources) {
-      const sq=await loadQuestions(src.file);
-      allQuestions.push(...sq);
-    }
-    
-    // Group by type and build header summary
-    let byType = {};
-    for(const type of ['单选题','多选题','判断题']) {
-      byType[type] = allQuestions.filter(q=>q.题型===type);
-    }
-    let typeSummary = Object.entries(byType).filter(([,qs])=>qs.length).map(([t,qs])=>` ${TYPE_ICON[t]}${qs.length}`).join('');
-    
-    let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">${subInfo.icon} ${subject}</div><div class="page-sub">${subInfo.name}${typeSummary}</div></div><div class="set-grid">`;
-    
-    for(const type of ['单选题','多选题','判断题']) {
-      const allQs = byType[type];
-      if(!allQs.length) continue;
-      const batchSize = BATCH[type];
-      const numBatches = Math.ceil(allQs.length / batchSize);
-      for(let b=0; b<numBatches; b++) {
-        const start = b * batchSize;
-        const end = Math.min(start + batchSize, allQs.length);
-        const batchQs = allQs.slice(start, end);
-        const doneCount = batchQs.filter(q=>progress.records[q.id]).length;
-        const pct = batchQs.length>0 ? Math.round(doneCount/batchQs.length*100) : 0;
-        const batchLabel = numBatches > 1 ? ` 第${b+1}组` : '';
-        html+=`<div class="set-card" onclick="navigate('#batch/${subject}/${type}/${b}')"><div class="s-title">${TYPE_ICON[type]} ${type}${batchLabel}</div><div class="s-count">${batchQs.length} 题（${start+1}-${end}）</div><div class="s-progress">已完成 ${doneCount}/${batchQs.length}${pct>0?` (${pct}%)`:''}</div>${doneCount>0?`<div class="s-bar"><div class="s-fill" style="width:${pct}%"></div></div>`:''}</div>`;
-      }
-    }
-    html+='</div>';
-    v.innerHTML=html;
-  }
-  
-  document.title=`${subject} · 演出经纪人`;
-  document.getElementById('view-subject').classList.add('active');
-}
-
-// ── Quiz State ──
-let quizState = { questions:[], currentIdx:0, source:'', answered:false, isMulti:false, isExam:false, wrongMode:false, quizType:null };
-let examState = { records:{}, startedAt:null, remaining:0, submitted:false };
-
-async function renderQuiz(source, typeOrIdx) {
-  const v=document.getElementById('view-quiz'); await loadIndex();
-  let qs=await getQuestionsBySource(source);
-  if(!qs) { v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">题库未找到</div></div>'; v.classList.add('active'); return; }
-  
-  // typeOrIdx: type string ('单选题'/'多选题'/'判断题') or number index or null
-  const QUIZ_TYPES = {'单选题':true,'多选题':true,'判断题':true};
-  let quizType = null;
-  let startIdx = null;
-  if (typeOrIdx && QUIZ_TYPES[typeOrIdx]) {
-    quizType = typeOrIdx;
-    qs = qs.filter(q => q.题型 === quizType);
-  } else if (typeOrIdx !== null) {
-    startIdx = parseInt(typeOrIdx);
-    if (isNaN(startIdx)) startIdx = null;
-  }
-  
-  // Resume from first unanswered when no explicit index is provided
-  let idx = Number.isInteger(startIdx) ? startIdx : 0;
-  if (startIdx === null && !quizState.wrongMode) {
-    const progress = loadProgress();
-    for(let i=0; i<qs.length; i++) { if(!progress.records[qs[i].id]) { idx=i; break; } }
-  }
-  idx = Math.max(0, Math.min(idx, qs.length-1));
-  
-  quizState.questions=qs; quizState.currentIdx=idx; quizState.source=source; quizState.answered=false; quizState.isExam=false; quizState.wrongMode=false;
-  quizState.quizType = quizType;
-  renderCurrentQuestion();
-  document.getElementById('view-quiz').classList.add('active');
-}
-
-// ── Batch Quiz (type-based grouped practice) ──
-async function renderBatch(subject, type, batchIdx) {
-  const v=document.getElementById('view-quiz'); await loadIndex();
-  const BATCH = { '单选题':100, '多选题':30, '判断题':30 };
-  const batchSize = BATCH[type] || 100;
-  
-  // Collect all questions of this type from this subject
-  let allQs=[];
-  const sources=getAllSources(subject);
-  for(const src of sources) {
-    const sq=await loadQuestions(src.file);
-    allQs.push(...sq.filter(q=>q.题型===type));
-  }
-  
-  const start = batchIdx * batchSize;
-  const end = Math.min(start + batchSize, allQs.length);
-  const qs = allQs.slice(start, end);
-  
-  if(!qs.length) {
-    v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">题库未找到</div></div>';
-    v.classList.add('active'); return;
-  }
-  
-  let idx = 0;
-  const progress = loadProgress();
-  for(let i=0; i<qs.length; i++) { if(!progress.records[qs[i].id]) { idx=i; break; } }
-  idx = Math.max(0, Math.min(idx, qs.length-1));
-  
-  const batchLabel = qs.length < batchSize ? `${start+1}-${end}` : `第${batchIdx+1}组`;
-  quizState.questions=qs; quizState.currentIdx=idx; quizState.source=`${subject} · ${type} ${batchLabel}`;
-  quizState.answered=false; quizState.isExam=false; quizState.wrongMode=false; quizState.quizType=null;
-  renderCurrentQuestion();
-  document.getElementById('view-quiz').classList.add('active');
-}
-
-function renderCurrentQuestion() {
-  const v = (quizState.isExam ? document.getElementById('view-exam') : document.getElementById('view-quiz'));
-  const qs=quizState.questions;
-  if(!qs.length || quizState.currentIdx>=qs.length) {
-    if(quizState.wrongMode) {
-      v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">🎉 错题全部消灭！</div></div><div style="text-align:center;padding:60px 20px;color:var(--muted);"><div style="font-size:48px;margin-bottom:16px;">🏆</div><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">太棒了！</div><div>所有错题已掌握</div><br><button class="btn btn-primary" onclick="navigate('#home')">返回首页</button></div>`;
-      return;
-    }
-    v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="goBackFromQuestion()">← 返回</button><div class="page-title">🎉 全部完成！</div></div><div style="text-align:center;padding:60px 20px;color:var(--muted);"><div style="font-size:48px;margin-bottom:16px;">🏆</div><div style="font-size:18px;color:var(--gold);margin-bottom:8px;">太棒了！</div><div>${formatSourceName(quizState.source)} 所有题目已完成</div><br><button class="btn btn-primary" onclick="navigate('#home')">返回首页</button></div>`;
-    return;
-  }
-  const q=qs[quizState.currentIdx]; const idx=quizState.currentIdx; const total=qs.length;
-  const pct=Math.round((idx+1)/total*100); const isMulti=q.题型==='多选题';
-  const isJudge=q.题型==='判断题';
-  quizState.isMulti=isMulti;
-  const records = quizState.isExam ? examState.records : loadProgress().records;
-  const record=records[q.id]||null; const options=q.选项||{}; const optKeys=Object.keys(options);
-  
-  // Detect real judge (true/false) vs pseudo judge (mislabeled multi-select)
-  const isRealJudge = isJudge && optKeys.length <= 2 && 
-    Object.values(options).every(v => ['对','错','正确','错误'].includes(v));
-  const judgeDisplay = {'A':'✓','B':'✗','对':'✓ 正确','错':'✗ 错误','正确':'✓ 正确','错误':'✗ 错误','A正确':'✓ 正确','B错误':'✗ 错误'};
-  
-  let oh='';
-  for(const k of optKeys) {
-    const val=options[k]; const hasPrev=record&&record.answer;
-    let cls='';
-    if(record) { if(record.correct) { cls=record.answer.includes(k)?'correct':''; } else { cls=q.答案.includes(k)?'show-correct':(record.answer.includes(k)?'wrong':''); } }
-    else if(hasPrev && !record.correct) { cls=q.答案.includes(k)?'show-correct':''; }
-    const selected=record&&record.answer&&record.answer.includes(k)?'selected':'';
-    const optLabel = isRealJudge ? (judgeDisplay[val] || val) : val;
-    const keyLabel = isRealJudge ? '' : k;
-    oh+=`<div class="quiz-option ${selected} ${cls}" data-key="${k}" onclick="selectOption(this,${isMulti})"><span class="opt-key">${keyLabel || (k==='A'?'✓':'✗')}</span><span class="opt-text">${optLabel}</span></div>`;
-  }
-  
-  let fb='';
-  if(record!==null) { quizState.answered=true;
-    const ansLabel = isRealJudge ? (judgeDisplay[q.答案] || q.答案) : q.答案;
-    fb=record.correct?`<div class="quiz-feedback correct-fb show"><span class="fb-correct">✅ 回答正确！</span></div>`
-      :`<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${ansLabel}</span></div>`;
-  }
-  
-  const examClass = '';
-  v.innerHTML=`
-    <div class="page-header">
-      <button class="back-btn" onclick="goBackFromQuestion()">← 返回</button>
-      <div class="page-title">${quizState.isExam?`📝 ${formatSourceName(quizState.source)}`:quizState.wrongMode?'🔄 错题循环':formatSourceName(quizState.source)}${quizState.quizType?` · ${quizState.quizType}`:''}</div>
-      <div class="page-sub" style="cursor:pointer" onclick="toggleSheet()">${idx+1}/${total} 📋</div>
-    </div>
-    ${quizState.isExam?`<div class="exam-timer" id="examTimer">⏱ 剩余时间：<span class="timer-num" id="timerDisplay">${formatTime(examState.remaining)}</span></div>`:''}
-    <div class="quiz-progress-top${examClass}"><span>第 ${idx+1} 题</span><div class="qpt-bar"><div class="qpt-fill" style="width:${pct}%"></div></div><span>${pct}%</span></div>
-    <div class="quiz-body">
-      <div class="quiz-type-badge">${isJudge?'🔘 判断题':isMulti?'📌 多选题':'🔵 单选题'}${quizState.wrongMode?' · 错题复习':''}</div>
-      <div style="font-size:12px;color:var(--muted);margin:-4px 0 12px;">来源：${formatSourceName(q.来源 || quizState.source, q.科目)}${getQuestionUrl(q)?` · <a href="${getQuestionUrl(q)}" target="_blank" rel="noopener noreferrer">原网页 ${getQuestionArticleId(q)}</a>`:''}</div>
-      <div class="quiz-question">${q.题干}</div>
-      <div class="quiz-options" id="optionsContainer">${oh}</div>
-      ${q.解析?`<div class="quiz-hint">💡 ${q.解析}</div>`:''}
-      ${fb}
-      <div class="quiz-actions">
-        ${!quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>提交答案</button>`:''}
-        ${quizState.isExam?`<button class="btn btn-primary" id="btnSubmit" onclick="submitAnswer()" ${quizState.answered?'disabled':''}>提交</button>`:''}
-        ${!quizState.isExam?`<button class="btn btn-secondary" id="btnNext" onclick="nextQuestion()" ${idx>=total-1?'disabled':''}>下一题 →</button>`:''}
-        ${`<button class="btn btn-secondary" onclick="previousQuestion()" ${idx===0?'disabled':''}>← 上一题</button>`}
-        ${!quizState.isExam?`<button class="btn btn-secondary" onclick="toggleSheet()">📋 答题卡</button>`:''}
-        ${quizState.isExam && !quizState.answered && idx < total-1 ? `<button class="btn btn-secondary" onclick="nextQuestion()">下一题 →</button>` : ''}
-        ${quizState.isExam && quizState.answered && idx < total-1 ? `<button class="btn btn-primary" onclick="nextQuestion()">下一题 →</button>` : ''}
-        ${quizState.isExam && quizState.answered && idx >= total-1 ? `<button class="btn btn-danger" onclick="submitExam()">📊 交卷</button>` : ''}
-      </div>
-      <div class="shortcut-hint">快捷键: ${isRealJudge?'<kbd>A</kbd> 正确 · <kbd>B</kbd> 错误':'<kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> 选择'} · <kbd>Enter</kbd> 提交 · <kbd>←</kbd><kbd>→</kbd> 翻页</div>
-    </div>
-  `;
-  renderSheet();
-}
-
-function selectOption(el,isMulti) {
-  if(quizState.answered) return;
-  const c=document.getElementById('optionsContainer');
-  if(!isMulti) { c.querySelectorAll('.quiz-option').forEach(o=>o.classList.remove('selected')); el.classList.add('selected'); }
-  else { el.classList.toggle('selected'); }
-}
-
-function submitAnswer() {
-  const selected = document.querySelectorAll('.quiz-option.selected');
-  if(!selected.length) return;
-  const q=quizState.questions[quizState.currentIdx];
-  const userAns = Array.from(selected).map(el=>el.dataset.key).sort().join('');
-  const correctAns = q.答案;
-  const settings = getSettings();
-  const isMultiActual = q.题型==='多选题';
-  let isCorrect;
-  if(isMultiActual && !settings.multiStrict) {
-    // Relaxed: user's choices are all within correct answer
-    isCorrect = userAns.length > 0 && userAns.split('').every(k => correctAns.includes(k));
-  } else {
-    isCorrect = userAns === correctAns;
-  }
-  
-  selected.forEach(el=>{ el.classList.remove('selected'); el.classList.add(isCorrect?'correct':'wrong'); });
-  if(!isCorrect) { document.querySelectorAll('.quiz-option').forEach(el=>{ if(correctAns.includes(el.dataset.key)) el.classList.add('show-correct'); }); }
-  
-  if(quizState.isExam) {
-    examState.records[q.id] = {correct:isCorrect, answer:userAns, time:Date.now()};
-  } else {
-    setRecord(q.id, isCorrect, userAns);
-  }
-  quizState.answered = true;
-  // In wrong mode, check if all wrong questions are cleared
-  if(quizState.wrongMode && isCorrect) {
-    const remaining = loadProgress().wrong.length;
-    if(remaining === 0) {
-      quizState.currentIdx = quizState.questions.length;
-      setTimeout(()=>{ renderCurrentQuestion(); }, settings.autoDelay);
-    }
-  }
-  const sb=document.getElementById('btnSubmit'); if(sb) sb.disabled=true;
-  const nx=document.getElementById('btnNext'); if(nx) nx.style.display='inline-block';
-  
-  const fbHtml=isCorrect
-    ? `<div class="quiz-feedback correct-fb show"><span class="fb-correct">✅ 回答正确！</span></div>`
-    : (()=>{
-      const judgeOpts = q.选项||{};
-      const isRJ = q.题型==='判断题' && Object.keys(judgeOpts).length<=2 && Object.values(judgeOpts).every(v=>['对','错','正确','错误'].includes(v));
-      const jd = {'对':'✓ 正确','错':'✗ 错误','正确':'✓ 正确','错误':'✗ 错误','A':'✓ 正确','B':'✗ 错误'};
-      const ca = isRJ ? (jd[correctAns]||correctAns) : correctAns;
-      return `<div class="quiz-feedback wrong-fb show"><span class="fb-wrong">❌ 答错了。</span> 正确答案：<span class="fb-correct">${ca}</span></div>`;
-    })();
-  const existing=document.querySelector('.quiz-feedback'); if(existing) existing.remove();
-  document.querySelector('.quiz-actions').insertAdjacentHTML('beforebegin', fbHtml);
-  renderSheet();
-  
-  // Auto next (correct only)
-  if(isCorrect && settings.autoNext && !quizState.isExam) {
-    setTimeout(()=>{ nextQuestion(); }, settings.autoDelay);
-  }
-}
-
-function nextQuestion() {
-  if(quizState.currentIdx < quizState.questions.length-1) { quizState.currentIdx++; quizState.answered=false; renderCurrentQuestion(); }
-  else if(quizState.wrongMode && quizState.currentIdx >= quizState.questions.length-1) {
-    // All wrong questions done - redirect to completion
-    const remaining = loadProgress().wrong.length;
-    if(remaining === 0) { quizState.currentIdx = quizState.questions.length; renderCurrentQuestion(); } // will show "all cleared"
-    else { navigate('#review'); }
-  }
-}
-function previousQuestion() {
-  if(quizState.currentIdx > 0) { quizState.currentIdx--; quizState.answered=false; renderCurrentQuestion(); }
-}
-function goToQuestion(idx) { quizState.currentIdx=idx; quizState.answered=false; renderCurrentQuestion(); toggleSheet(); }
-
-function toggleSheet() {
-  document.getElementById('sheetOverlay').classList.toggle('show');
-  document.getElementById('answerSheet').classList.toggle('show');
-}
-function renderSheet() {
-  const sheet=document.getElementById('answerSheet'), overlay=document.getElementById('sheetOverlay');
-  const qs=quizState.questions; if(!qs.length) return;
-  const records = quizState.isExam ? examState.records : loadProgress().records;
-  let singleHtml='', multiHtml='', judgeHtml='';
-  qs.forEach((q,i)=>{
-    const rec=records[q.id]; let cls='';
-    if(rec) cls=rec.correct?'done-correct':'done-wrong';
-    if(i===quizState.currentIdx) cls+=' current';
-    const dot=`<div class="as-dot ${cls}" onclick="goToQuestion(${i})">${i+1}</div>`;
-    if(q.题型==='多选题') multiHtml+=dot;
-    else if(q.题型==='判断题') judgeHtml+=dot;
-    else singleHtml+=dot;
+function renderAchievementGrid(cat) {
+  // Update tabs
+  document.querySelectorAll('.ach-tab').forEach(t => {
+    const isActive = (cat === 'all' && t.textContent === '全部') || 
+                     (cat !== 'all' && t.textContent.includes(CAT_NAMES[cat]));
+    t.classList.toggle('active', isActive);
   });
-  sheet.innerHTML=`<button class="as-close" onclick="toggleSheet()">✕</button><div class="as-title">📋 答题卡</div>${singleHtml?`<div class="as-section"><div class="as-stitle">单选题 ${qs.filter(q=>q.题型==='单选题').length} 题</div><div class="as-grid">${singleHtml}</div></div>`:''}${multiHtml?`<div class="as-section"><div class="as-stitle">多选题 ${qs.filter(q=>q.题型==='多选题').length} 题</div><div class="as-grid">${multiHtml}</div></div>`:''}${judgeHtml?`<div class="as-section"><div class="as-stitle">判断题 ${qs.filter(q=>q.题型==='判断题').length} 题</div><div class="as-grid">${judgeHtml}</div></div>`:''}<div class="as-legend"><span class="lg"><span class="dot" style="background:var(--green-dim);border:1px solid var(--green)"></span> 正确</span><span class="lg"><span class="dot" style="background:rgba(232,93,93,.15);border:1px solid var(--red)"></span> 错误</span><span class="lg"><span class="dot" style="background:var(--bg-card);border:1px solid var(--border)"></span> 未答</span></div>`;
-  overlay.onclick=toggleSheet;
-}
-
-// ── Exam Mode ──
-let examTimer = null;
-function formatTime(seconds) { const m=Math.max(0,Math.floor(seconds/60)); const s=Math.max(0,seconds%60); return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
-async function renderExam(source) {
-  const v=document.getElementById('view-exam'); await loadIndex();
-  const qs=await getQuestionsBySource(source);
-  if(!qs||!qs.length) { v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">模拟卷未找到</div></div>'; v.classList.add('active'); return; }
   
-  // Reset exam answers (exam mode must not reuse practice records)
-  examState = { records:{}, startedAt:Date.now(), remaining:50*60, submitted:false };
-  quizState.questions=qs; quizState.currentIdx=0; quizState.source=source; quizState.answered=false; quizState.isMulti=false; quizState.isExam=true; quizState.wrongMode=false; quizState.quizType=null;
-  
-  // Start timer
-  if(examTimer) clearInterval(examTimer);
-  examTimer = setInterval(()=>{
-    examState.remaining--;
-    const td=document.getElementById('timerDisplay');
-    if(td) td.textContent=formatTime(examState.remaining);
-    if(examState.remaining<=0 && quizState.isExam) { clearInterval(examTimer); examTimer=null; submitExam(true); }
-  },1000);
-  
-  renderCurrentQuestion();
-  document.getElementById('view-exam').classList.add('active');
-}
-
-function submitExam(force=false) {
-  if(examState.submitted) return;
-  if(!force && !confirm('确定要交卷吗？已答题目将被记录，未答题目计为错误。')) return;
-  if(examTimer) { clearInterval(examTimer); examTimer=null; }
-  examState.submitted = true;
-  const qs=quizState.questions; const records=examState.records;
-  let correct=0, wrong=0, unanswered=0;
-  for(const q of qs) {
-    const rec=records[q.id];
-    if(!rec) unanswered++;
-    else if(rec.correct) correct++;
-    else wrong++;
-  }
-  for(const q of qs) { const rec=records[q.id]; if(rec) setRecord(q.id, rec.correct, rec.answer); }
-  const total=qs.length; const score=Math.round(correct/total*100);
-  const v=document.getElementById('view-exam');
-  v.innerHTML=`
-    <div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📊 模拟考成绩</div></div>
-    <div class="exam-result">
-      <div class="er-score">${score}<span style="font-size:24px;color:var(--muted)">%</span></div>
-      <div class="er-label">${score>=60?'✅ 合格':'❌ 未通过'}</div>
-      <div class="er-detail"><span class="er-item">正确: <span class="er-num">${correct}</span></span><span class="er-item">错误: <span class="er-num">${wrong}</span></span><span class="er-item">未答: <span class="er-num">${unanswered}</span></span><span class="er-item">共: <span class="er-num">${total}</span> 题</span></div>
-      <div class="er-actions">
-        <button class="btn btn-primary" onclick="navigate('#home')">返回首页</button>
-        <button class="btn btn-secondary" onclick="navigate('#review')">查看错题</button>
-        <button class="btn btn-secondary" onclick="navigate('#exam/${encodeURIComponent(quizState.source)}')">再做一次</button>
-      </div>
-    </div>
-  `;
-}
-
-// ── Wrong Quiz Mode ──
-async function renderWrongQuiz(source) {
-  const v=document.getElementById('view-quiz'); await loadIndex();
-  const progress=loadProgress(); const wrongIds=progress.wrong;
-  if(!wrongIds.length) {
-    v.innerHTML='<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">🎉 暂无错题</div></div>';
-    v.classList.add('active'); return;
-  }
-  
-  let wrongQs=[];
-  if(source) {
-    const qs=await getQuestionsBySource(source);
-    if(qs) wrongQs=qs.filter(q=>wrongIds.includes(q.id));
-  } else {
-    for(const km of ['科目一','科目二','综合']) for(const qt of ['主题库','模拟卷']) {
-      const g=indexData[km]?.[qt]; if(!g) continue;
-      for(const [name,info] of Object.entries(g)) {
-        if(name.startsWith('_')) continue;
-        const qs=await loadQuestions(info['文件']);
-        for(const q of qs) if(wrongIds.includes(q.id)) wrongQs.push(q);
-      }
-    }
-  }
-  if(!wrongQs.length) { renderReview(); return; }
-  
-  quizState.questions=wrongQs; quizState.currentIdx=0; quizState.source='错题'; quizState.answered=false; quizState.isMulti=false; quizState.isExam=false; quizState.wrongMode=true; quizState.quizType=null;
-  renderCurrentQuestion();
-  document.getElementById('view-quiz').classList.add('active');
-}
-
-// ── Review ──
-async function renderReview() {
-  const v=document.getElementById('view-review'); const progress=loadProgress(); const wrongIds=progress.wrong||[];
-  if(!wrongIds.length) {
-    v.innerHTML=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📕 错题本</div></div><div class="review-empty"><div class="re-icon">🎉</div><div>暂无错题，继续保持！</div></div>`;
-    v.classList.add('active'); return;
-  }
-  await loadIndex();
-  
-  // Collect wrong questions with their source info
-  let wrongQs=[];
-  for(const km of ['科目一','科目二','综合']) for(const qt of ['主题库','模拟卷']) {
-    const g=indexData[km]?.[qt]; if(!g) continue;
-    for(const [name,info] of Object.entries(g)) {
-      if(name.startsWith('_')) continue;
-      const qs=await loadQuestions(info['文件']);
-      for(let i=0; i<qs.length; i++) { const q=qs[i]; if(wrongIds.includes(q.id)) wrongQs.push({...q, srcFile:info['文件'], srcName:name, srcSubject:km, srcIndex:i}); }
-    }
-  }
-  
-  let html=`<div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📕 错题本</div><div class="page-sub">${wrongQs.length} 题待复习 <span style="cursor:pointer;color:var(--gold);margin-left:8px;" onclick="navigate('#wrong')">🔄 错题循环</span></div></div><div class="review-list">`;
-  for(const q of wrongQs) {
-    const rec=progress.records[q.id];
-    const ss=formatSourceName(q.srcName, q.srcSubject)||q.来源;
-    html+=`<div class="review-card" onclick="navigate('#wrong')"><div class="rc-header"><span class="rc-source">${q.srcSubject} · ${ss}${getQuestionUrl(q)?` · <a href="${getQuestionUrl(q)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">原网页 ${getQuestionArticleId(q)}</a>`:''}</span><span class="rc-type">${q.题型==='多选题'?'多选':'单选'}</span></div><div class="rc-question">${q.题干.length>60?q.题干.slice(0,60)+'...':q.题干}</div><div class="rc-answers"><span class="ra-yours">你的答案：${rec?rec.answer:'未答'}</span> &nbsp;|&nbsp; <span class="ra-correct">正确答案：${q.答案}</span></div><span class="rc-tag" onclick="event.stopPropagation();markMastered(q.id);renderReview()">✅ 标记掌握</span></div>`;
-  }
-  html+=`</div><div style="padding:12px 24px 24px;"><button class="btn btn-danger" onclick="clearWrong();navigate('#review')" style="width:100%">🗑 清空错题本</button></div>`;
-  v.innerHTML=html; document.title='错题本 · Agent Exam Training';
-  v.classList.add('active');
-}
-
-
-// ── Changelog ──
-function renderChangelog() {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('view-changelog');
-  v.innerHTML=`
-    <div class="page-header"><button class="back-btn" onclick="navigate('#home')">← 返回</button><div class="page-title">📜 版本更新记录</div><div class="page-sub">题库演练系统 V5</div></div>
-    <div style="max-width:700px;margin:0 auto;padding:20px 24px;">
-      <div class="cl-item"><span class="cl-ver">V5</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 📖考点笔记功能（考试大纲篇 & 重要考点篇） <span class="tag tag-add">新增</span> 爬取108322/108323两篇学习笔记 <span class="tag tag-add">新增</span> 底部翻页按钮 <span class="tag tag-add">新增</span> 翻页自动滚动到顶部 <span class="tag tag-add">新增</span> 红色高亮重点（必考/常考/题库） <span class="tag tag-fix">修复</span> 30道多选题补充缺失的E/F选项 <span class="tag tag-fix">修复</span> 5道判断题→多选题（恢复真实选项） <span class="tag tag-fix">修复</span> 舞台模拟题二#4选项D合并到C已拆分 <span class="tag tag-fix">修复</span> 舞台模拟题二#18缺失选项B <span class="tag tag-fix">修复</span> 20道多选题答案小写→大写（判分异常） <span class="tag tag-fix">修复</span> 后台统计按钮被考点笔记容器点击覆盖 <span class="tag tag-fix">修复</span> 清理死代码和空引用 <span class="tag tag-ref">改版</span> 笔记按原网站分页符翻页 <span class="tag tag-ref">改版</span> 大纲篇按章节分页 <span class="tag tag-ref">改版</span> Made by Sisyphus</div></div>
-      <div class="cl-item"><span class="cl-ver">V4</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-add">新增</span> 题型独立分组（100单选/30多选/30判断一组） <span class="tag tag-add">新增</span> 模拟卷合并为3套 <span class="tag tag-add">新增</span> 模拟考未做题也显示上下题按钮 <span class="tag tag-ref">改版</span> 去掉题型标题行，数量标在科目头部 <span class="tag tag-add">新增</span> 答题卡新增判断题分区 <span class="tag tag-ref">改版</span> 解析从题干独立到选项下方 <span class="tag tag-fix">修复</span> 判断题UI显示（✓/✗） <span class="tag tag-fix">修复</span> multiStrict判分开关生效 <span class="tag tag-fix">修复</span> 重置数据按钮对登录用户无效</div></div>
-      <div class="cl-item"><span class="cl-ver">V3</span><span class="cl-date">2026-05-10</span><div class="cl-desc"><span class="tag tag-fix">修复</span> 错题本点击跳错题循环不返回完整题库 <span class="tag tag-add">新增</span> 去重48道内部重复题（2139→2091） <span class="tag tag-fix">修复</span> 索引同步2139→2091 <span class="tag tag-fix">修复</span> 50道单选题→判断题重分类 <span class="tag tag-fix">修复</span> 括号加空格 <span class="tag tag-add">新增</span> 未答题目显示上下题按钮 <span class="tag tag-add">新增</span> 题型统计增加判断题显示 <span class="tag tag-fix">修复</span> 去重后自动清理失效做题记录</div></div>
-      <div class="cl-item"><span class="cl-ver">V2</span><span class="cl-date">2026-05-09</span><div class="cl-desc"><span class="tag tag-add">新增</span> 键盘快捷键 <span class="tag tag-add">新增</span> 后台统计面板 <span class="tag tag-add">新增</span> 导入6套ycjjr模拟卷 + 部署Render/GitHub <span class="tag tag-add">新增</span> 自动下一题设置 <span class="tag tag-add">新增</span> PostgreSQL云存储 <span class="tag tag-ref">改版</span> 快捷键提示移到按钮下方 <span class="tag tag-ref">改版</span> 后台入口加入学习统计栏</div></div>
-      <div class="cl-item"><span class="cl-ver">V1</span><span class="cl-date">2026-05-08</span><div class="cl-desc">演出经纪人题库系统上线 · 支持科目一/二主题库 · 模拟考试 · 错题本 · 多用户登录</div></div>
-    </div>
-    <div style="text-align:center;padding:2px 20px 24px;font-size:11px;color:var(--muted);opacity:.5;">Made by Sisyphus 🏹</div>
-  `;
-  document.title = '版本记录 · Agent Exam Training';
-  v.classList.add('active');
-}
-
-// ── Note Viewer ──
-function renderNote(source) {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('view-note');
-  
-  if (!source) {
-    const notes = indexData?.['综合']?.['考点笔记'] || {};
-    let html = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">📖 考点笔记</div><div class="page-sub">考试大纲 & 重点知识</div></div><div class="set-grid">';
-    for (const [name, info] of Object.entries(notes)) {
-      if (name.startsWith('_')) continue;
-      html += '<div class="set-card" onclick="navigate(\'#note/' + encodeURIComponent(name) + '\')"><div class="s-title">📖 ' + name + '</div><div class="s-count">考点笔记</div></div>';
-    }
-    html += '</div>';
-    v.innerHTML = html;
-  } else {
-    const notes = indexData?.['综合']?.['考点笔记'] || {};
-    const info = notes[source];
-    if (!info) { v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">笔记未找到</div></div>'; v.classList.add('active'); return; }
-    
-    fetch('./data/' + info['文件'], {cache:'no-store'}).then(r=>r.json()).then(data => {
-      if (!data.text) { v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">内容为空</div></div>'; v.classList.add('active'); return; }
-      
-      // Split by page break markers FIRST (if any)
-      var rawText = data.text;
-      var pageBreaks = rawText.split(/[﹃﹄]+/).map(s => s.trim()).filter(s => s);
-      
-      var pages = [];
-      if (pageBreaks.length > 1) {
-        pages = pageBreaks;
-      } else {
-        // Fallback: split by section headers
-        var sectionHeaders = /^(第[一二三四五六七八九十]+章)/;
-        var lines = rawText.split('\n').filter(function(l) { return l.trim(); });
-        var cur = [];
-        for (var i = 0; i < lines.length; i++) {
-          var t = lines[i].trim();
-          if (sectionHeaders.test(t) && cur.length > 0) {
-            pages.push(cur.join('\n'));
-            cur = [lines[i]];
-          } else {
-            cur.push(lines[i]);
-          }
-        }
-        if (cur.length > 0) pages.push(cur.join('\n'));
-        if (pages.length === 0) pages = [rawText];
-        
-        // Merge short first page into second
-        while (pages.length >= 2) {
-          var fc = pages[0].split('\n').filter(function(l){return l.trim();}).length;
-          if (fc < 10) { pages[1] = pages[0] + '\n' + pages[1]; pages.shift(); }
-          else break;
-        }
-      }
-      
-      var totalPages = pages.length;
-      
-      const hl = (text) => text.replace(/(必考|超级[^。]*重点|常考|重点|题库|重要|全部记住|必须记住|只能做成小卡片)/g, '<span style="color:var(--red);font-weight:600">$1</span>');
-      
-      function renderPage(pageIdx) {
-        var idx = Math.max(0, Math.min(pageIdx, pages.length - 1));
-        var content = pages[idx];
-        if (!content) return;
-        
-        var lines = content.split('\n');
-        var c = '';
-        for (var i = 0; i < lines.length; i++) {
-          var t = lines[i].trim();
-          if (!t) { c += '<div style="height:6px"></div>'; continue; }
-          var isSection = /^第[一二三四五六七八九十]+[部分章节篇]/.test(t);
-          var isHeader = /^[一二三四五六七八九十]+[、.．]/.test(t) && t.length < 25;
-          var isSub = /^\d+[.、．]/.test(t) || /^[\d]+）/.test(t);
-          c += isSection ? '<div style="color:var(--gold);font-weight:700;font-size:15px;margin-top:20px;margin-bottom:6px;">' + hl(t) + '</div>'
-             : isHeader ? '<div style="color:var(--teal);font-weight:600;margin-top:14px;margin-bottom:4px;">' + hl(t) + '</div>'
-             : isSub ? '<div style="padding-left:12px;margin:2px 0;">' + hl(t) + '</div>'
-             : '<div style="margin:2px 0;">' + hl(t) + '</div>';
-        }
-        
-        var bodyEl = document.getElementById('note-body');
-        if (bodyEl) bodyEl.innerHTML = c + '<div style="padding:16px 0 4px;display:flex;justify-content:center;align-items:center;gap:8px;border-top:1px solid var(--border);margin-top:16px;"><button class="btn btn-secondary btn-small" onclick="window.notePage(' + (idx - 1) + ')" ' + (idx === 0 ? 'disabled' : '') + '>← 上一页</button><span style="font-size:12px;color:var(--muted);margin:0 8px;">' + (idx + 1) + ' / ' + totalPages + '</span><button class="btn btn-secondary btn-small" onclick="window.notePage(' + (idx + 1) + ')" ' + (idx >= totalPages - 1 ? 'disabled' : '') + '>下一页 →</button></div>';
-        
-        var pageEl = document.getElementById('note-pages');
-        if (pageEl) {
-          var b = '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (idx - 1) + ')" ' + (idx === 0 ? 'disabled' : '') + '>← 上一页</button>';
-          b += '<span style="margin:0 12px;font-size:13px;color:var(--muted)">' + (idx + 1) + ' / ' + totalPages + '</span>';
-          b += '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (idx + 1) + ')" ' + (idx >= totalPages - 1 ? 'disabled' : '') + '>下一页 →</button>';
-          pageEl.innerHTML = b;
-        }
-        document.title = source + ' (' + (idx + 1) + '/' + totalPages + ') · Agent Exam Training';
-        window.scrollTo(0,0);
-}
-      
-      window.notePage = renderPage;
-      
-      v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#note\')">← 笔记列表</button><div class="page-title">📖 ' + source + '</div><div class="page-sub"><a href="' + (data.url||'#') + '" target="_blank" style="color:var(--muted)">原网页 ↗</a> · ' + totalPages + '页</div></div><div style="padding:16px 24px 0;display:flex;justify-content:center;align-items:center;gap:8px;flex-shrink:0;" id="note-pages"></div><div class="note-body" id="note-body" style="padding-bottom:0;"></div>';
-      
-      renderPage(0);
-    }).catch(() => {
-      v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">加载失败</div></div>';
+  const s = window.__achState;
+  const unlocked = s ? s.unlocked : {};
+  const keys = Object.entries(ACHIEVEMENTS)
+    .filter(([k, a]) => cat === 'all' || a.cat === cat)
+    .sort(([ka, a], [kb, b]) => {
+      const ua = unlocked[ka] ? 1 : 0, ub = unlocked[kb] ? 1 : 0;
+      return ub - ua;  // unlocked first
     });
-  }
   
-  document.title = source ? source + ' · Agent Exam Training' : '考点笔记 · Agent Exam Training';
-  v.classList.add('active');
+  const rar = { bronze:'铜', silver:'银', gold:'金', platinum:'铂金' };
+  let grid = '<div class="ach-grid">';
+  
+  for (const [key, ach] of keys) {
+    const isUnlocked = !!unlocked[key];
+    const prog = getAchievementProgress(key);
+    const pct = Math.min(100, Math.round(prog[0] / prog[1] * 100));
+    const dateStr = isUnlocked ? new Date(unlocked[key]).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}) : '';
+    const goldClass = ach.rarity === 'gold' || ach.rarity === 'platinum' ? ' gold' : '';
+    
+    grid += '<div class="ach-card' + (isUnlocked ? goldClass : ' locked') + '">';
+    grid += '<div class="ac-glow"></div>';
+    grid += '<div class="ac-icon">' + ach.icon + '</div>';
+    grid += '<div class="ac-name">' + ach.name + '</div>';
+    grid += '<div class="ac-desc">' + ach.desc + '</div>';
+    if (isUnlocked) {
+      grid += '<div class="ac-rarity ach-rarity-' + ach.rarity + '">✦ ' + (rar[ach.rarity]||ach.rarity) + '</div>';
+      if (dateStr) grid += '<div class="ac-date">' + dateStr + ' 获得</div>';
+    } else {
+      grid += '<div class="ac-progress">' + prog[0] + '/' + prog[1] + '</div>';
+      grid += '<div class="ac-rarity" style="color:var(--muted);">🔒 未获得</div>';
+    }
+    grid += '</div>';
+  }
+  grid += '</div>';
+  
+  document.getElementById('achGridContainer').innerHTML = grid;
+  document.title = '成就 · Agent Exam Training';
 }
 // ── Admin ──
 async function renderAdmin() {
