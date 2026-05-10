@@ -190,7 +190,6 @@ function safeStaticPath(urlPath) {
 function userSummary(username, progress) {
   const records = progress.records || {};
   const meta = loadQuestionMeta();
-  // Only count records for questions that still exist
   const validRecords = Object.fromEntries(Object.entries(records).filter(([qid]) => meta[qid]));
   const answered = Object.keys(validRecords).length;
   const single = calcRate(validRecords, q => q.type === '单选题');
@@ -199,44 +198,44 @@ function userSummary(username, progress) {
   const s1 = calcRate(validRecords, q => q.subject === '科目一');
   const s2 = calcRate(validRecords, q => q.subject === '科目二');
   
-  // Calculate XP from records (deduplicated by qid, first attempt by time)
-  const sorted = Object.entries(validRecords).sort((a,b) => (a[1].time||0) - (b[1].time||0));
-  const seen = new Set();
-  const deduped = [];
-  let xp = 0, streak = 0, maxStreak = 0;
-  for (const [qid, rec] of sorted) {
-    if (seen.has(qid)) continue;
-    seen.add(qid);
-    deduped.push(rec);
-    xp += rec.correct ? 10 : 2;
-    if (rec.correct) { streak++; if (streak > maxStreak) maxStreak = streak; }
-    else streak = 0;
+  // XP and achievements: read from game state (same source as frontend)
+  // Fall back to calculating from records only if game state doesn't exist
+  let xp = 0;
+  let achievements = [];
+  const game = progress.game;
+  if (game) {
+    xp = game.xp || 0;
+    achievements = game.unlocked ? Object.keys(game.unlocked) : [];
+  } else {
+    // Initial calculation for users who haven't synced game state yet
+    const sorted = Object.entries(validRecords).sort((a,b) => (a[1].time||0) - (b[1].time||0));
+    const seen = new Set();
+    let streak = 0, maxStreak = 0, correct = 0, total = 0;
+    for (const [qid, rec] of sorted) {
+      if (seen.has(qid)) continue;
+      seen.add(qid); total++;
+      xp += rec.correct ? 10 : 2;
+      if (rec.correct) { correct++; streak++; if (streak > maxStreak) maxStreak = streak; }
+      else streak = 0;
+    }
+    const acc = total > 0 ? Math.round(correct / total * 100) : 0;
+    if (total >= 1) achievements.push('first_q');
+    if (total >= 10) achievements.push('ten_q');
+    if (total >= 50) achievements.push('fifty_q');
+    if (total >= 100) achievements.push('hundred_q');
+    if (total >= 500) achievements.push('fivehundred_q');
+    if (total >= 1000) achievements.push('thousand_q');
+    if (total >= 1500) achievements.push('q1500');
+    if (total >= 1750) achievements.push('q1750');
+    if (total >= 2091) achievements.push('all_q');
+    if (total >= 50 && acc >= 60) achievements.push('acc_60');
+    if (total >= 100 && acc >= 80) achievements.push('acc_80');
+    if (total >= 200 && acc >= 90) achievements.push('acc_90');
+    if (maxStreak >= 5) achievements.push('streak_5');
+    if (maxStreak >= 10) achievements.push('streak_10');
+    if (maxStreak >= 20) achievements.push('streak_20');
+    if ((progress.wrong || []).length === 0 && total >= 10) achievements.push('wrong_zero');
   }
-  
-  // Calculate achievements from deduped records
-  const answeredCount = deduped.length;
-  const correctCount = deduped.filter(r => r?.correct).length;
-  const acc = answeredCount > 0 ? Math.round(correctCount / answeredCount * 100) : 0;
-  const wrongCount = (progress.wrong || []).length;
-  const achievements = [];
-  if (answeredCount >= 1) achievements.push('first_q');
-  if (answeredCount >= 10) achievements.push('ten_q');
-  if (answeredCount >= 50) achievements.push('fifty_q');
-  if (answeredCount >= 100) achievements.push('hundred_q');
-  if (answeredCount >= 150) achievements.push('q150');
-  if (answeredCount >= 250) achievements.push('q250');
-  if (answeredCount >= 500) achievements.push('fivehundred_q');
-  if (answeredCount >= 750) achievements.push('q750');
-  if (answeredCount >= 1000) achievements.push('thousand_q');
-  if (answeredCount >= 1500) achievements.push('q1500');
-  if (answeredCount >= 1750) achievements.push('q1750');
-  if (answeredCount >= 2091) achievements.push('all_q');
-  if (answeredCount >= 50 && acc >= 60) achievements.push('acc_60');
-  if (answeredCount >= 100 && acc >= 80) achievements.push('acc_80');
-  if (answeredCount >= 200 && acc >= 90) achievements.push('acc_90');
-  if (maxStreak >= 5) achievements.push('streak_5');
-  if (maxStreak >= 10) achievements.push('streak_10');
-  if (maxStreak >= 20) achievements.push('streak_20');
   if (wrongCount === 0 && answeredCount >= 10) achievements.push('wrong_zero');
   
   return {
