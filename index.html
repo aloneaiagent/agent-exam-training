@@ -1017,77 +1017,70 @@ function renderNote(source) {
     fetch('./data/' + info['文件'], {cache:'no-store'}).then(r=>r.json()).then(data => {
       if (!data.text) { v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#home\')">← 返回</button><div class="page-title">内容为空</div></div>'; v.classList.add('active'); return; }
       
-      const lines = data.text.split('\n').filter(l => l.trim());
+      // Split by page break markers FIRST (if any)
+      var rawText = data.text;
+      var pageBreaks = rawText.split(/[﹃﹄]+/).map(s => s.trim()).filter(s => s);
       
-      // Split into sections at natural boundaries
-      const sectionHeaders = /^(第[一二三四五六七八九十]+[部分章节篇]|第[一二三四五六七八九十]+节)/;
-      let sections = [];
-      let cur = [];
-      for (const line of lines) {
-        const t = line.trim();
-        if (sectionHeaders.test(t) && cur.length > 0) {
-          sections.push(cur);
-          cur = [line];
-        } else {
-          cur.push(line);
+      var pages = [];
+      if (pageBreaks.length > 1) {
+        pages = pageBreaks;
+      } else {
+        // Fallback: split by section headers
+        var sectionHeaders = /^(第[一二三四五六七八九十]+[部分章节篇])/;
+        var lines = rawText.split('\n').filter(function(l) { return l.trim(); });
+        var cur = [];
+        for (var i = 0; i < lines.length; i++) {
+          var t = lines[i].trim();
+          if (sectionHeaders.test(t) && cur.length > 0) {
+            pages.push(cur.join('\n'));
+            cur = [lines[i]];
+          } else {
+            cur.push(lines[i]);
+          }
         }
+        if (cur.length > 0) pages.push(cur.join('\n'));
+        if (pages.length === 0) pages = [rawText];
       }
-      if (cur.length > 0) sections.push(cur);
       
-      // If no section breaks found, treat whole content as one section
-      if (sections.length === 0) sections = [lines];
-      
-      // Group sections into pages: max 2 sections per page (so a part/chapter stays intact)
-      const MAX_SECTIONS_PER_PAGE = 2;
-      let pages = [];
-      for (let i = 0; i < sections.length; i += MAX_SECTIONS_PER_PAGE) {
-        const merged = [];
-        for (let j = i; j < i + MAX_SECTIONS_PER_PAGE && j < sections.length; j++) {
-          merged.push.apply(merged, sections[j]);
-        }
-        pages.push(merged);
-      }
+      var totalPages = pages.length;
       
       const hl = (text) => text.replace(/(必考|超级[^。]*重点|常考|重点|题库|重要|全部记住|必须记住|只能做成小卡片)/g, '<span style="color:var(--red);font-weight:600">$1</span>');
       
-      let currentPage = 0;
-      
       function renderPage(pageIdx) {
-        currentPage = Math.max(0, Math.min(pageIdx, pages.length - 1));
-        const pageLines = pages[currentPage];
-        if (!pageLines) return;
+        var idx = Math.max(0, Math.min(pageIdx, pages.length - 1));
+        var content = pages[idx];
+        if (!content) return;
         
-        let c = '';
-        for (const line of pageLines) {
-          const t = line.trim();
+        var lines = content.split('\n');
+        var c = '';
+        for (var i = 0; i < lines.length; i++) {
+          var t = lines[i].trim();
           if (!t) { c += '<div style="height:6px"></div>'; continue; }
-          const isSection = /^第[一二三四五六七八九十]+[部分章节篇]/.test(t);
-          const isHeader = /^[一二三四五六七八九十]+[、.．]/.test(t) && t.length < 25;
-          const isSub = /^\d+[.、．]/.test(t) || /^[\d]+）/.test(t);
+          var isSection = /^第[一二三四五六七八九十]+[部分章节篇]/.test(t);
+          var isHeader = /^[一二三四五六七八九十]+[、.．]/.test(t) && t.length < 25;
+          var isSub = /^\d+[.、．]/.test(t) || /^[\d]+）/.test(t);
           c += isSection ? '<div style="color:var(--gold);font-weight:700;font-size:15px;margin-top:20px;margin-bottom:6px;">' + hl(t) + '</div>'
              : isHeader ? '<div style="color:var(--teal);font-weight:600;margin-top:14px;margin-bottom:4px;">' + hl(t) + '</div>'
              : isSub ? '<div style="padding-left:12px;margin:2px 0;">' + hl(t) + '</div>'
              : '<div style="margin:2px 0;">' + hl(t) + '</div>';
         }
         
-        const bodyEl = document.getElementById('note-body');
+        var bodyEl = document.getElementById('note-body');
         if (bodyEl) bodyEl.innerHTML = c;
         
-        const pageEl = document.getElementById('note-pages');
+        var pageEl = document.getElementById('note-pages');
         if (pageEl) {
-          let btns = '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (currentPage - 1) + ')" ' + (currentPage === 0 ? 'disabled' : '') + '>← 上一页</button>';
-          btns += '<span style="margin:0 12px;font-size:13px;color:var(--muted)">' + (currentPage + 1) + ' / ' + totalPages + '</span>';
-          btns += '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (currentPage + 1) + ')" ' + (currentPage >= totalPages - 1 ? 'disabled' : '') + '>下一页 →</button>';
-          pageEl.innerHTML = btns;
+          var b = '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (idx - 1) + ')" ' + (idx === 0 ? 'disabled' : '') + '>← 上一页</button>';
+          b += '<span style="margin:0 12px;font-size:13px;color:var(--muted)">' + (idx + 1) + ' / ' + totalPages + '</span>';
+          b += '<button class="btn btn-secondary btn-small" onclick="window.notePage(' + (idx + 1) + ')" ' + (idx >= totalPages - 1 ? 'disabled' : '') + '>下一页 →</button>';
+          pageEl.innerHTML = b;
         }
-        document.title = source + ' (' + (currentPage + 1) + '/' + totalPages + ') · Agent Exam Training';
+        document.title = source + ' (' + (idx + 1) + '/' + totalPages + ') · Agent Exam Training';
       }
       
       window.notePage = renderPage;
-      // Compute totalPages from pages array
-      var totalPages = pages.length;
       
-      v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#note\')">← 笔记列表</button><div class="page-title">📖 ' + source + '</div><div class="page-sub"><a href="' + (data.url||'#') + '" target="_blank" style="color:var(--muted)">原网页 ↗</a></div></div><div style="padding:16px 24px 0;display:flex;justify-content:center;align-items:center;gap:8px;flex-shrink:0;" id="note-pages"></div><div class="note-body" id="note-body" style="padding-bottom:0;"></div>';
+      v.innerHTML = '<div class="page-header"><button class="back-btn" onclick="navigate(\'#note\')">← 笔记列表</button><div class="page-title">📖 ' + source + '</div><div class="page-sub"><a href="' + (data.url||'#') + '" target="_blank" style="color:var(--muted)">原网页 ↗</a> · ' + totalPages + '页</div></div><div style="padding:16px 24px 0;display:flex;justify-content:center;align-items:center;gap:8px;flex-shrink:0;" id="note-pages"></div><div class="note-body" id="note-body" style="padding-bottom:0;"></div>';
       
       renderPage(0);
     }).catch(() => {
