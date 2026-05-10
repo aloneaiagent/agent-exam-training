@@ -65,6 +65,18 @@ function syncGame() {
   sG(g);return true;
 }
 
+// Award XP incrementally when answering a question
+function awardXp(amount,qid,correct){
+  var g=getGameState();
+  if(g.answeredIds.indexOf(qid)>=0) return false;
+  g.answeredIds.push(qid);
+  g.xp+=amount;
+  if(correct){g.streak++;if(g.streak>g.maxStreak)g.maxStreak=g.streak;}
+  else g.streak=0;
+  sG(g);
+  return true;
+}
+
 function chkAch() {
   let p=loadProgress(),g=gG(),rec=p.records||{},an=Object.keys(rec).length;
   let co=Object.values(rec).filter(r=>r?.correct).length,ac=an>0?Math.round(co/an*100):0;

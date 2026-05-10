@@ -351,6 +351,12 @@ function setRecord(qid,correct,answer) {
   if(!correct && !p.wrong.includes(qid)) p.wrong.push(qid);
   if(correct) p.wrong = p.wrong.filter(w=>w!==qid);
   saveProgress(p);
+  // Game system: award XP and check achievements immediately
+  if(typeof awardXp !== 'undefined') {
+    if(awardXp(correct?10:2, qid, correct)) {
+      if(typeof checkAchievements !== 'undefined') checkAchievements();
+    }
+  }
 }
 function markMastered(qid) { const p=loadProgress(); p.wrong=p.wrong.filter(w=>w!==qid); saveProgress(p); }
 function getStats() { const p=loadProgress(); const meta=allQuestionMeta||{};
@@ -1240,6 +1246,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.documentElement.style.setProperty('--font-size', s.fontSize+'px');
   await loadIndex();
   const ok = await restoreLogin();
+  // Initialize game state at startup
+  if(ok && typeof syncGame !== 'undefined') { try { syncGame(); } catch(e) {} }
   if(ok) navigate(location.hash || '#home');
   else renderLogin();
 });
