@@ -117,6 +117,7 @@ function chkAch() {
 // Aliases for index.html template
 function getGameState(){return gG();}
 function calcLevel(x){return cL(x);}
+var checkAchievements = chkAch;
 
 function goAch(){
   syncGame();chkAch();
