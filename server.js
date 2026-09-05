@@ -17,42 +17,63 @@ const PORT = Number(process.env.PORT || 8080);
 // Uses PostgreSQL when DATABASE_URL env var is set (Render), otherwise file-based.
 
 let pgPool = null;
-const usePostgres = !!process.env.DATABASE_URL;
+let storageMode = process.env.DATABASE_URL ? 'postgres' : 'file';
+const DB_CONNECT_TIMEOUT_MS = Number(process.env.DB_CONNECT_TIMEOUT_MS || 5000);
 
-if (usePostgres) {
+if (storageMode === 'postgres') {
   const { Pool } = require('pg');
-  pgPool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: DB_CONNECT_TIMEOUT_MS,
+  });
+}
+
+function initFileDb() {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!fs.existsSync(DB_PATH)) {
+    const users = {};
+    for (const username of Object.keys(USERS)) users[username] = defaultProgress();
+    fs.writeFileSync(DB_PATH, JSON.stringify({ users }, null, 2));
+  }
+}
+
+async function fallBackToFile(error) {
+  if (storageMode === 'file') return;
+  console.error(`PostgreSQL 不可用，切换到文件存储：${error.message || error}`);
+  storageMode = 'file';
+  const oldPool = pgPool;
+  pgPool = null;
+  if (oldPool) await oldPool.end().catch(() => {});
+  initFileDb();
 }
 
 async function initDb() {
-  if (!usePostgres) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    if (!fs.existsSync(DB_PATH)) {
-      const users = {};
-      for (const username of Object.keys(USERS)) users[username] = defaultProgress();
-      fs.writeFileSync(DB_PATH, JSON.stringify({ users }, null, 2));
-    }
-    return;
-  }
+  if (storageMode === 'file') return initFileDb();
+
   // PostgreSQL: create table if not exists
-  await pgPool.query(`
-    CREATE TABLE IF NOT EXISTS progress (
-      username TEXT PRIMARY KEY,
-      records JSONB DEFAULT '{}',
-      wrong JSONB DEFAULT '[]',
-      stats JSONB DEFAULT '{"total":0,"correct":0}',
-      game JSONB DEFAULT '{}',
-      generated_at TIMESTAMPTZ DEFAULT NOW()
-    )
-  `);
-  // Migration: add game column to existing tables
-  await pgPool.query(`ALTER TABLE progress ADD COLUMN IF NOT EXISTS game JSONB DEFAULT '{}'`);
-  // Ensure all USERS have a row
-  for (const username of Object.keys(USERS)) {
-    await pgPool.query(
-      'INSERT INTO progress (username) VALUES ($1) ON CONFLICT (username) DO NOTHING',
-      [username]
-    );
+  try {
+    await pgPool.query(`
+      CREATE TABLE IF NOT EXISTS progress (
+        username TEXT PRIMARY KEY,
+        records JSONB DEFAULT '{}',
+        wrong JSONB DEFAULT '[]',
+        stats JSONB DEFAULT '{"total":0,"correct":0}',
+        game JSONB DEFAULT '{}',
+        generated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    // Migration: add game column to existing tables
+    await pgPool.query(`ALTER TABLE progress ADD COLUMN IF NOT EXISTS game JSONB DEFAULT '{}'`);
+    // Ensure all USERS have a row
+    for (const username of Object.keys(USERS)) {
+      await pgPool.query(
+        'INSERT INTO progress (username) VALUES ($1) ON CONFLICT (username) DO NOTHING',
+        [username]
+      );
+    }
+  } catch (error) {
+    await fallBackToFile(error);
   }
 }
 
@@ -61,8 +82,8 @@ function defaultProgress() {
 }
 
 async function readDb() {
-  if (!usePostgres) {
-    initDb();
+  if (storageMode === 'file') {
+    initFileDb();
     try {
       const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
       db.users ||= {};
@@ -73,7 +94,13 @@ async function readDb() {
     }
   }
   // PostgreSQL
-  const result = await pgPool.query('SELECT username, records, wrong, stats, game FROM progress');
+  let result;
+  try {
+    result = await pgPool.query('SELECT username, records, wrong, stats, game FROM progress');
+  } catch (error) {
+    await fallBackToFile(error);
+    return readDb();
+  }
   const users = {};
   for (const username of Object.keys(USERS)) users[username] = defaultProgress();
   for (const row of result.rows) {
@@ -89,17 +116,23 @@ async function readDb() {
 
 async function writeDb(db) {
   // PostgreSQL: only the users table is passed in
-  if (!usePostgres) {
-    const tmp = `${DB_PATH}.tmp`;
+  if (storageMode === 'file') {
+    initFileDb();
+    const tmp = `${DB_PATH}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`;
     fs.writeFileSync(tmp, JSON.stringify(db, null, 2));
     fs.renameSync(tmp, DB_PATH);
     return;
   }
-  for (const [username, progress] of Object.entries(db.users || {})) {
-    await pgPool.query(
-      `UPDATE progress SET records = $1, wrong = $2, stats = $3, game = $5, generated_at = NOW() WHERE username = $4`,
-      [progress.records || {}, JSON.stringify(progress.wrong || []), progress.stats || { total: 0, correct: 0 }, username, JSON.stringify(progress.game || {})]
-    );
+  try {
+    for (const [username, progress] of Object.entries(db.users || {})) {
+      await pgPool.query(
+        `UPDATE progress SET records = $1, wrong = $2, stats = $3, game = $5, generated_at = NOW() WHERE username = $4`,
+        [progress.records || {}, JSON.stringify(progress.wrong || []), progress.stats || { total: 0, correct: 0 }, username, JSON.stringify(progress.game || {})]
+      );
+    }
+  } catch (error) {
+    await fallBackToFile(error);
+    await writeDb(db);
   }
 }
 
@@ -184,10 +217,15 @@ function contentType(file) {
 }
 
 function safeStaticPath(urlPath) {
-  const pathname = decodeURIComponent(urlPath.split('?')[0]);
+  let pathname;
+  try {
+    pathname = decodeURIComponent(urlPath.split('?')[0]);
+  } catch {
+    return null;
+  }
   const rel = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '');
   const full = path.resolve(ROOT, rel);
-  if (!full.startsWith(ROOT)) return null;
+  if (full !== ROOT && !full.startsWith(`${ROOT}${path.sep}`)) return null;
   return full;
 }
 
@@ -295,7 +333,12 @@ async function handleApi(req, res) {
     }
 
     if (req.method === 'GET' && req.url === '/api/version') {
-      return sendJson(res, 200, { version: '7.0.0', totalQuestions: 2091, subjects: { '科目一': 885, '科目二': 781, '综合': 425 } });
+      const meta = loadQuestionMeta();
+      const subjects = { '科目一': 0, '科目二': 0, '综合': 0 };
+      for (const question of Object.values(meta)) {
+        if (Object.hasOwn(subjects, question.subject)) subjects[question.subject]++;
+      }
+      return sendJson(res, 200, { version: '7.0.0', totalQuestions: Object.keys(meta).length, subjects });
     }
 
     if (req.method === 'GET' && req.url === '/api/admin/stats') {
@@ -333,7 +376,7 @@ const server = http.createServer((req, res) => {
   await initDb();
   server.listen(PORT, '0.0.0.0', () => {
     console.log(`题库系统已启动：http://localhost:${PORT}`);
-    console.log(`存储模式：${usePostgres ? 'PostgreSQL' : '文件(本地)'}`);
-    if (!usePostgres) console.log(`后台账号：li / wangwang`);
+    console.log(`存储模式：${storageMode === 'postgres' ? 'PostgreSQL' : '文件(降级模式)'}`);
+    if (storageMode === 'file') console.log(`后台账号：li / wangwang`);
   });
 })();

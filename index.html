@@ -330,6 +330,15 @@ const DEFAULT_SETTINGS = { autoNext: true, autoDelay: 800, fontSize: 16, multiSt
 // ── Storage ──
 function blankProgress() { return { records:{}, wrong:[], stats:{total:0,correct:0} }; }
 function normalizeProgress(p) { p=p&&typeof p==='object'?p:blankProgress(); p.records=p.records||{}; p.wrong=p.wrong||[]; p.stats=p.stats||{total:0,correct:0}; return p; }
+function recoverCachedProgress(username, serverProgress) {
+  const remote = normalizeProgress(serverProgress);
+  try {
+    const cached = normalizeProgress(JSON.parse(localStorage.getItem(`${LS_KEY}_${username}`)||'null'));
+    // A new/empty fallback store must not erase work still present in this browser.
+    if(Object.keys(remote.records).length===0 && Object.keys(cached.records).length>0) return {progress:cached, recovered:true};
+  } catch {}
+  return {progress:remote, recovered:false};
+}
 function loadProgress() { return normalizeProgress(currentProgress); }
 function saveProgress(p) {
   currentProgress = normalizeProgress(p);
@@ -396,9 +405,11 @@ async function doLogin() {
     const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
     const data=await r.json();
     if(!r.ok) throw new Error(data.error||'登录失败');
-    authToken=data.token; currentUser={username:data.username, role:data.role}; currentProgress=normalizeProgress(data.progress);
+    authToken=data.token; currentUser={username:data.username, role:data.role};
+    const recovered=recoverCachedProgress(currentUser.username, data.progress); currentProgress=recovered.progress;
     localStorage.setItem(AUTH_KEY, JSON.stringify({token:authToken, user:currentUser}));
     localStorage.setItem(`${LS_KEY}_${currentUser.username}`, JSON.stringify(currentProgress));
+    if(recovered.recovered) saveProgress(currentProgress);
     navigate('#home');
   } catch(e) { if(err) err.textContent=e.message || '登录失败'; }
 }
@@ -410,7 +421,9 @@ async function restoreLogin() {
     authToken=raw.token; currentUser=raw.user;
     const r=await fetch('/api/me',{headers:authHeaders()});
     if(!r.ok) throw new Error('expired');
-    const data=await r.json(); currentUser={username:data.username, role:data.role}; currentProgress=normalizeProgress(data.progress);
+    const data=await r.json(); currentUser={username:data.username, role:data.role};
+    const recovered=recoverCachedProgress(currentUser.username, data.progress); currentProgress=recovered.progress;
+    if(recovered.recovered) saveProgress(currentProgress);
     return true;
   } catch { localStorage.removeItem(AUTH_KEY); authToken=null; currentUser=null; currentProgress=blankProgress(); return false; }
 }
